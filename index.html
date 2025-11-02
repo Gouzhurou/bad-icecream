@@ -10,18 +10,6 @@
         <canvas id="gameCanvas" width="800" height="800"></canvas>
     </div>
 
-    <script type="module">
-        import { mapManager } from './mapManager.js';
-
-        var canvas = document.getElementById('gameCanvas');
-        var ctx = canvas.getContext('2d');
-
-        mapManager.loadMap("map.tmj");
-        // spriteManager.loadAtlas("atlas.json", "atlas.png");
-        // mapManager.parseEntities();
-        mapManager.draw(ctx);
-
-        console.log('Map manager loaded successfully');
-    </script>
+    <script src="index.js" type="module"></script>
 </body>
 </html>
