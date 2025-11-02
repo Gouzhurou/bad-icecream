@@ -1,3 +1,6 @@
+const tileLayerType = "tilelayer";
+const objectLayerType = "objectgroup";
+
 /**
  * @typedef {Object} Tileset
  * @property {number} firstgid - Первый GID тайлсета
@@ -17,6 +20,8 @@
  * @property {string} type - тип слоя. Может быть "tilelayer" или "objectgroup"
  */
 
+// добавить поле для хранения идентификаторов препятствий
+
 /**
  * Объект для управления картой игры
  * @namespace
@@ -35,7 +40,10 @@ export var mapManager = {
     imgLoadCount: 0,
     imgLoaded: false,
     jsonLoaded: false,
-    view: {x: 0, y: 0, w: 800, h: 800},
+    view: {
+        x: 0, y: 0,
+        w: document.getElementById("gameCanvas").width,
+        h: document.getElementById("gameCanvas").height},
 
     /**
      * Загружает JSON карты с сервера
@@ -60,7 +68,7 @@ export var mapManager = {
         this.mapData = JSON.parse(tilesJSON);
         for (var i = 0; i < this.mapData.layers.length; i++) {
             var layer = this.mapData.layers[i];
-            if (layer.type === "tilelayer") {
+            if (layer.type === tileLayerType) {
                 this.tLayer[this.tLayerCount++] = layer;
             }
         }
@@ -104,7 +112,7 @@ export var mapManager = {
             setTimeout(function () { mapManager.parseEntities(); }, 100);
         } else {
             for (var i = 0; i < this.mapData.layers.length; i++) {
-                if (this.mapData.layers[i].type === "objectgroup") {
+                if (this.mapData.layers[i].type === objectLayerType) {
                     var entities = this.mapData.layers[i];
                     for (var j = 0; j < entities.objects.length; j++) {
                         var e = entities.objects[j];

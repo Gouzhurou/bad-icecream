@@ -1,9 +1,9 @@
-import { mapManager } from './mapManager.js';
+import { mapManager } from './managers/mapManager.js';
 
 var canvas = document.getElementById('gameCanvas');
 var ctx = canvas.getContext('2d');
 
-mapManager.loadMap("map.tmj");
+mapManager.loadMap("./js/map.tmj");
 // spriteManager.loadAtlas("atlas.json", "atlas.png");
 // mapManager.parseEntities();
 mapManager.draw(ctx);
