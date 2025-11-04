@@ -1,4 +1,7 @@
-import {mapManager} from "./mapManager";
+import {mapManager} from "./mapManager.js";
+import {gameManager} from "../core/gameManager.js";
+
+const WallsIndices = [1, 3, 4, 5, 6, 10, 12, 13, 14];
 
 /**
  * Объект для определения физики перемещений объектов
@@ -18,22 +21,24 @@ export var physicManager = {
         var newX = obj.pos_x + Math.floor(obj.move_x * obj.speed);
         var newY = obj.pos_y + Math.floor(obj.move_y * obj.speed);
 
-        var idx = mapManager.getTilesetIndex(
+        console.log(`Old coordinates: ${obj.pos_x}: ${obj.pos_y}`);
+        console.log(`New coordinates: ${newX}: ${newY}`);
+
+        var entity = this.entityAtXY(obj, newX, newY);
+        if (entity !== null && obj.onTouchEntity) {
+            obj.onTouchEntity(entity);
+        }
+
+        var index = mapManager.getTilesetIndex(
             newX + obj.size_x / 2,
             newY + obj.size_y / 2
         );
-        var e = this.entityAtXY(obj, newX, newY);
-
-        if (e !== null && obj.onTouchEntity) {
-            obj.onTouchEntity(e);
-        }
-        // добавить проверку на наличие препятствия
-        if (obj.onTouchMap) {
-            obj.onTouchMap(idx);
+        var isWall = WallsIndices.includes(index);
+        if (isWall && obj.onTouchMap) {
+            obj.onTouchMap(index);
         }
 
-        // добавить проверку на отсутствие препятствий
-        if (e === null) {
+        if (!isWall) {
             obj.pos_x = newX;
             obj.pos_y = newY;
         } else {

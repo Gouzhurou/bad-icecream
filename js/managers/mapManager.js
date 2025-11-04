@@ -1,4 +1,4 @@
-import {gameManager} from "../core/gameManager";
+import {gameManager} from "../core/gameManager.js";
 
 const tileLayerType = "tilelayer";
 const objectLayerType = "objectgroup";
@@ -14,6 +14,7 @@ const objectLayerType = "objectgroup";
 
 /**
  * @typedef {Object} TileLayer
+ * @property {string} name - имя слоя
  * @property {number[]} data - массив индексов тайлов
  * @property {number} height - высота в тайлах
  * @property {number} width - ширина в тайлах
@@ -31,6 +32,12 @@ export var mapManager = {
     /** @type {TileLayer[]} */
     tLayer: [],
     tLayerCount: 0,
+    /** @type {TileLayer} */
+    iceLayer: {},
+    /** @type {TileLayer} */
+    wallsLayer: {},
+    /** @type {TileLayer} */
+    backgroundLayer: {},
     xCount: 0, // в тайлах
     yCount: 0, // в тайлах
     tSize: {x: 64, y: 64}, // в пикселях
@@ -51,12 +58,25 @@ export var mapManager = {
      * @param {string} path - Путь к JSON файлу карты
      */
     loadMap(path) {
+        console.log('MapManager: Загрузка карты:', path);
+
         var request = new XMLHttpRequest();
+
         request.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
-                mapManager.parseMap(request.responseText);
+            if (this.readyState === 4) {
+                if (this.status === 200) {
+                    console.log('MapManager: Карта загружена, размер:', this.responseText.length, 'символов');
+                    mapManager.parseMap(this.responseText);
+                } else {
+                    console.error('MapManager: Ошибка загрузки:', this.status, this.statusText);
+                }
             }
-        }
+        };
+
+        request.onerror = function () {
+            console.error('MapManager: Сетевая ошибка');
+        };
+
         request.open("GET", path, true);
         request.send();
     },
@@ -66,14 +86,37 @@ export var mapManager = {
      * @param {string} tilesJSON - JSON строка с данными карты в формате Tiled
      */
     parseMap(tilesJSON) {
-        this.mapData = JSON.parse(tilesJSON);
+        console.log('MapManager: Начало парсинга карты');
+
+        try {
+            this.mapData = JSON.parse(tilesJSON);
+            console.log('MapManager: JSON успешно распарсен');
+        } catch (e) {
+            console.error('MapManager: Ошибка парсинга JSON:', e);
+            return;
+        }
+
+        // Парсинг слоев
+        console.log(`MapManager: Обработка ${this.mapData.layers.length} слоев`);
+        let tileLayerCount = 0;
+
         for (var i = 0; i < this.mapData.layers.length; i++) {
             var layer = this.mapData.layers[i];
+            console.log(`MapManager: Слой ${i}: "${layer.name}" (тип: ${layer.type}, видим: ${layer.visible})`);
+
             if (layer.type === tileLayerType) {
                 this.tLayer[this.tLayerCount++] = layer;
+                tileLayerCount++;
+                if (layer.name === "walls") this.wallsLayer = layer;
+                if (layer.name === "ice") this.iceLayer = layer;
+                if (layer.name === "background") this.backgroundLayer = layer;
+                console.log(`MapManager: Добавлен тайловый слой "${layer.name}"`);
             }
         }
 
+        console.log(`MapManager: Найдено ${tileLayerCount} тайловых слоев`);
+
+        // Установка размеров
         this.xCount = this.mapData.width;
         this.yCount = this.mapData.height;
         this.tSize.x = this.mapData.tilewidth;
@@ -81,18 +124,50 @@ export var mapManager = {
         this.mapSize.x = this.xCount * this.tSize.x;
         this.mapSize.y = this.yCount * this.tSize.y;
 
+        console.log(`MapManager: Размер карты: ${this.xCount}x${this.yCount} тайлов`);
+        console.log(`MapManager: Размер тайла: ${this.tSize.x}x${this.tSize.y} пикселей`);
+        console.log(`MapManager: Размер карты в пикселях: ${this.mapSize.x}x${this.mapSize.y}`);
+
+        // Поиск тайлсета льда
+        console.log(`MapManager: Поиск тайлсета "ice" среди ${this.mapData.tilesets.length} тайлсетов`);
         const iceTileset = this.mapData.tilesets.find(ts => ts.name === "ice");
-        this.iceIndex = iceTileset.firstgid;
+        if (iceTileset) {
+            this.iceIndex = iceTileset.firstgid;
+            console.log(`MapManager: Найден тайлсет "ice", первый GID: ${this.iceIndex}`);
+        } else {
+            console.warn('MapManager: Тайлсет "ice" не найден');
+            this.iceIndex = 0;
+        }
+
+        // Загрузка изображений тайлсетов
+        console.log(`MapManager: Начало загрузки ${this.mapData.tilesets.length} тайлсетов`);
 
         for (var i = 0; i < this.mapData.tilesets.length; i++) {
+            var tileset = this.mapData.tilesets[i];
+            console.log(`MapManager: Загрузка тайлсета ${i}: "${tileset.name}" (изображение: ${tileset.image})`);
+
             var img = new Image();
             img.onload = function () {
                 mapManager.imgLoadCount++;
+                console.log(`MapManager: Изображение загружено (${mapManager.imgLoadCount}/${mapManager.mapData.tilesets.length})`);
+
                 if (mapManager.imgLoadCount === mapManager.mapData.tilesets.length) {
                     mapManager.imgLoaded = true;
+                    console.log('MapManager: Все изображения тайлсетов загружены');
                 }
             };
-            img.src = this.mapData.tilesets[i].image;
+
+            img.onerror = function () {
+                console.error('MapManager: Ошибка загрузки изображения тайлсета');
+                mapManager.imgLoadCount++;
+                // Продолжаем даже при ошибке загрузки изображения
+                if (mapManager.imgLoadCount === mapManager.mapData.tilesets.length) {
+                    mapManager.imgLoaded = true;
+                    console.log('MapManager: Все изображения обработаны (некоторые с ошибками)');
+                }
+            };
+
+            img.src = tileset.image;
 
             var t = this.mapData.tilesets[i];
             var ts = {
@@ -103,41 +178,94 @@ export var mapManager = {
                 yCount: Math.floor(t.imageheight / this.tSize.y), // в тайлах
             };
             this.tilesets.push(ts);
+
+            console.log(`MapManager: Создан тайлсет "${ts.name}": ` +
+                `GID=${ts.firstgid}, размер=${ts.xCount}x${ts.yCount} тайлов`);
         }
 
         this.jsonLoaded = true;
+        console.log('MapManager: Парсинг карты завершен успешно');
+        console.log(`MapManager: Загружено тайлсетов: ${this.tilesets.length}`);
+        console.log(`MapManager: Состояние - JSON: ${this.jsonLoaded}, Изображения: ${this.imgLoaded} (${this.imgLoadCount}/${this.mapData.tilesets.length})`);
     },
 
     /**
      * Парсит JSON данные сущностей и инициализирует сущностей менеджера игры, в том числе игрока
      */
     parseEntities() {
+        console.log('MapManager: Начало парсинга сущностей с карты');
+
         if (!mapManager.imgLoaded || !mapManager.jsonLoaded) {
+            console.log('MapManager: Ресурсы еще не загружены, повторная попытка через 100мс');
             setTimeout(function () { mapManager.parseEntities(); }, 100);
         } else {
+            console.log('MapManager: Ресурсы загружены, начинаем парсинг сущностей');
+
+            let entityCount = 0;
+            let playerFound = false;
+
             for (var i = 0; i < this.mapData.layers.length; i++) {
-                if (this.mapData.layers[i].type === objectLayerType) {
-                    var entities = this.mapData.layers[i].objects;
+                var layer = this.mapData.layers[i];
+                console.log(`MapManager: Проверка слоя ${i}: ${layer.name} (тип: ${layer.type})`);
+
+                if (layer.type === objectLayerType) {
+                    var entities = layer.objects;
+                    console.log(`MapManager: Найден слой объектов "${layer.name}" с ${entities.length} сущностями`);
+
                     for (var j = 0; j < entities.length; j++) {
                         var entity = entities[j];
+                        console.log(`MapManager: Обработка сущности ${j}: ${entity.name} (тип: ${entity.type})`);
+
                         try {
-                            var obj = Object.create(gameManager.factory[entity.type]);
+                            // Проверяем существование фабрики для этого типа сущности
+                            if (!gameManager.factory[entity.type]) {
+                                console.warn(`MapManager: Фабрика для типа "${entity.type}" не найдена`);
+                                continue;
+                            }
+
+                            var obj = new gameManager.factory[entity.type];
+                            console.log(obj);
                             obj.name = entity.name;
                             obj.pos_x = entity.x;
                             obj.pos_y = entity.y;
-                            obj.size_x = entity.width; // в пикселях
-                            obj.size_y = entity.height; // в пикселях
+                            obj.size_x = entity.width;
+                            obj.size_y = entity.height;
+
+                            console.log(`MapManager: Создана сущность "${entity.name}" типа "${entity.type}" ` +
+                                `на позиции (${entity.x}, ${entity.y}) размером ${entity.width}x${entity.height}`);
+
                             gameManager.entities.push(obj);
-                            if(obj.name === "Player")
+                            entityCount++;
+
+                            if (obj.name === "Player") {
+                                console.log('MapManager: Найден игрок, инициализация...');
                                 gameManager.initPlayer(obj);
+                                playerFound = true;
+                            }
+
                         } catch (e) {
-                            console.log(`Error while creating: [${entity.gid}] ${entity.type}, ${e}`);
+                            console.error(`MapManager: Ошибка при создании сущности [${entity.gid}] ${entity.type}:`, e);
                         }
                     }
                 }
             }
+
+            console.log(`MapManager: Парсинг завершен. Создано ${entityCount} сущностей`);
+
+            if (!playerFound) {
+                console.warn('MapManager: ВНИМАНИЕ! Игрок не найден на карте');
+            }
+
+            if (entityCount === 0) {
+                console.warn('MapManager: ВНИМАНИЕ! Не создано ни одной сущности');
+            }
+
+            console.log('MapManager: Итоговое количество сущностей в gameManager:', gameManager.entities.length);
+            console.log('MapManager: Игрок инициализирован:', gameManager.player !== null);
         }
     },
+
+    //TODO: добавить отдельно отрисовку слоя background и остальных
 
     /**
      * Отрисовывает карту на canvas контексте
@@ -235,13 +363,17 @@ export var mapManager = {
 
     /**
      * Находит индекс тайла по его координатам на карте
-     * @param {number} x - X-координата тайла на карте в пикселях
-     * @param {number} y - Y-координата тайла на карте в пикселях
+     * @param {number} x - X-координата тайла на карте (в пикселях)
+     * @param {number} y - Y-координата тайла на карте (в пикселях)
      * @return {number} индекс тайла
      */
     getTilesetIndex(x, y) {
         const index = Math.floor(y / this.tSize.y) * this.xCount + Math.floor(x / this.tSize.x);
-        return this.tLayer.data[index];
+        const iceIndex = this.iceLayer.data[index];
+        if (iceIndex > 0) { return iceIndex; }
+        const wallIndex = this.wallsLayer.data[index];
+        if (wallIndex > 0) { return wallIndex; }
+        return this.backgroundLayer.data[index];
     },
 
     // сделать установку и удаление только блоков льда
@@ -253,8 +385,7 @@ export var mapManager = {
      */
     setIceTile(x, y) {
         const index = y * this.xCount + x;
-        var iceLayer = this.tLayer.find(layer => layer.name === "ice");
-        iceLayer.data[index] = this.iceIndex;
+        this.iceLayer.data[index] = this.iceIndex;
     },
 
     /**
@@ -264,8 +395,7 @@ export var mapManager = {
      */
     deleteIceTile(x, y) {
         const index = y * this.xCount + x;
-        var iceLayer = this.tLayer.find(layer => layer.name === "ice");
-        iceLayer.data[index] = 0;
+        this.iceLayer.data[index] = 0;
     },
 
     /**

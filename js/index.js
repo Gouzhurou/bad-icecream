@@ -1,4 +1,4 @@
-import {gameManager} from "./core/gameManager";
+import {gameManager} from "./core/gameManager.js";
 
 var canvas = document.getElementById('gameCanvas');
 var ctx = canvas.getContext('2d');

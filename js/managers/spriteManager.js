@@ -1,3 +1,5 @@
+import {mapManager} from "./mapManager.js";
+
 /**
  * @typedef {Object} Sprite
  * @property {string} name - Название спрайта
@@ -45,7 +47,7 @@ export var spriteManager = {
     parseAtlas(atlasJSON) {
         var atlas = JSON.parse(atlasJSON);
         for (var name in atlas.frames) {
-            var frame = atlas.frames[name].frameNumber;
+            var frame = atlas.frames[name].frame;
             /** @type {Sprite} */
             var sprite = {
                 name: name,
@@ -90,6 +92,16 @@ export var spriteManager = {
             x -= mapManager.view.x;
             y -= mapManager.view.y;
             ctx.drawImage(this.image, sprite.x, sprite.y, sprite.w, sprite.h, x, y, sprite.w, sprite.h);
+
+            // TODO: убрать обводку
+            ctx.save();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.rect(x, y, sprite.w, sprite.h);
+            ctx.stroke();
+            ctx.restore();
         }
     },
 
