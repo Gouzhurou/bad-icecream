@@ -1,3 +1,5 @@
+import {gameManager} from "../core/gameManager";
+
 const tileLayerType = "tilelayer";
 const objectLayerType = "objectgroup";
 
@@ -19,8 +21,6 @@ const objectLayerType = "objectgroup";
  * @property {boolean} visible - видимость слоя
  * @property {string} type - тип слоя. Может быть "tilelayer" или "objectgroup"
  */
-
-// добавить поле для хранения идентификаторов препятствий
 
 /**
  * Объект для управления картой игры
@@ -44,6 +44,7 @@ export var mapManager = {
         x: 0, y: 0,
         w: document.getElementById("gameCanvas").width,
         h: document.getElementById("gameCanvas").height},
+    iceIndex: 0,
 
     /**
      * Загружает JSON карты с сервера
@@ -80,6 +81,9 @@ export var mapManager = {
         this.mapSize.x = this.xCount * this.tSize.x;
         this.mapSize.y = this.yCount * this.tSize.y;
 
+        const iceTileset = this.mapData.tilesets.find(ts => ts.name === "ice");
+        this.iceIndex = iceTileset.firstgid;
+
         for (var i = 0; i < this.mapData.tilesets.length; i++) {
             var img = new Image();
             img.onload = function () {
@@ -113,21 +117,21 @@ export var mapManager = {
         } else {
             for (var i = 0; i < this.mapData.layers.length; i++) {
                 if (this.mapData.layers[i].type === objectLayerType) {
-                    var entities = this.mapData.layers[i];
-                    for (var j = 0; j < entities.objects.length; j++) {
-                        var e = entities.objects[j];
+                    var entities = this.mapData.layers[i].objects;
+                    for (var j = 0; j < entities.length; j++) {
+                        var entity = entities[j];
                         try {
-                            var obj = Object.create(gameManager.factory[e.type]);
-                            obj.name = e.name;
-                            obj.pos_x = e.x;
-                            obj.pos_y = e.y;
-                            obj.size_x = e.width; // в пикселях
-                            obj.size_y = e.height; // в пикселях
+                            var obj = Object.create(gameManager.factory[entity.type]);
+                            obj.name = entity.name;
+                            obj.pos_x = entity.x;
+                            obj.pos_y = entity.y;
+                            obj.size_x = entity.width; // в пикселях
+                            obj.size_y = entity.height; // в пикселях
                             gameManager.entities.push(obj);
-                            if(obj.name === "player")
+                            if(obj.name === "Player")
                                 gameManager.initPlayer(obj);
-                        } catch (ex) {
-                            console.log(`Error while creating: [${e.gid}] ${e.type}, ${ex}`);
+                        } catch (e) {
+                            console.log(`Error while creating: [${entity.gid}] ${entity.type}, ${e}`);
                         }
                     }
                 }
@@ -235,36 +239,33 @@ export var mapManager = {
      * @param {number} y - Y-координата тайла на карте в пикселях
      * @return {number} индекс тайла
      */
-    getTilesetIdx(x, y) {
-        const idx = Math.floor(y / this.tSize.y) * this.xCount + Math.floor(x / this.tSize.x);
-        return this.tLayer.data[idx];
+    getTilesetIndex(x, y) {
+        const index = Math.floor(y / this.tSize.y) * this.xCount + Math.floor(x / this.tSize.x);
+        return this.tLayer.data[index];
     },
 
     // сделать установку и удаление только блоков льда
 
     /**
-     * Устанавливает тайл на карту
+     * Устанавливает тайл льда на карту
      * @param {number} x - X-координата тайла на карте в тайлах
      * @param {number} y - Y-координата тайла на карте в тайлах
-     * @param {number} tileIndex - индекс тайла
-     * @param {CanvasRenderingContext2D} ctx - Контекст canvas для отрисовки
      */
-    setTile(x, y, tileIndex, ctx) {
+    setIceTile(x, y) {
         const index = y * this.xCount + x;
-        this.tLayer.data[index] = tileIndex;
-        this.draw(ctx);
+        var iceLayer = this.tLayer.find(layer => layer.name === "ice");
+        iceLayer.data[index] = this.iceIndex;
     },
 
     /**
-     * Удаляет тайл с карты
+     * Удаляет тайл льда с карты
      * @param {number} x - X-координата тайла на карте в тайлах
      * @param {number} y - Y-координата тайла на карте в тайлах
-     * @param {CanvasRenderingContext2D} ctx - Контекст canvas для отрисовки
      */
-    deleteTile(x, y, ctx) {
+    deleteIceTile(x, y) {
         const index = y * this.xCount + x;
-        this.tLayer.data[index] = 0;
-        this.draw(ctx);
+        var iceLayer = this.tLayer.find(layer => layer.name === "ice");
+        iceLayer.data[index] = 0;
     },
 
     /**
