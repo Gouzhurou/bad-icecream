@@ -12,7 +12,7 @@ export class Money extends Entity {
     animationName = 'money64';
     /** @type {number} - номер текущего фрейма в анимации */
     frameNumber = 0;
-    /** @type {Object} - анимации игрока */
+    /** @type {Object} - анимации сущности */
     animations = {
         "bomb": [
             "bomb_1",

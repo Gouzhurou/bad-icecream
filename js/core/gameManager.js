@@ -4,6 +4,7 @@ import {spriteManager} from "../managers/spriteManager.js";
 import {Player} from '../entities/Player.js';
 import {GreenMonster} from "../entities/GreenMonster.js";
 import {Money} from "../entities/Money.js";
+import {infoManager} from "../managers/infoManager.js";
 
 export var gameManager = {
     /** @type {Object<string, Entity>} - эталонные объекты, которые используются для
@@ -92,6 +93,7 @@ export var gameManager = {
         mapManager.centerAt(this.player.pos_x, this.player.pos_y);
         mapManager.draw(this.ctx);
         this.draw(this.ctx);
+        infoManager.drawPoints(this.ctx, this.player.points);
     },
 
     /**
