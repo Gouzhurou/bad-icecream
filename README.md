@@ -13,3 +13,4 @@
 - Есть «интеллектуальные» противники и «бонусы»
 - Используются tiles с редактором [Tiled](https://www.mapeditor.org/) в соответствии с УП
 - Изображения объединяются в атлас в формате JSON, например, в редакторе [Leshy SpriteSheet Tool](https://www.leshylabs.com/apps/sstool/)
+- Спрайты можно брать, например, [тут](https://itch.io/game-assets/free)
