@@ -14,171 +14,133 @@ export class Player extends Entity {
     /** @type {number} - скорость движения */
     speed = 10;
     /** @type {number} - количество бонусов */
-    bonus = 0;
+    points = 0;
     /** @type {string} - имя текущей анимации */
     animationName = 'hero_idle_down';
     /** @type {number} - номер текущего фрейма в анимации */
     frameNumber = 0;
-    /** @type {number} - счетчик для определения скорости смены фреймов */
-    frameCounter = 0;
     /** @type {Object} - анимации игрока */
     animations = {
-        'hero_attack1_down': {
-            framerate: 8,
-            frames: [
-                'hero_attack1_down_1',
-                'hero_attack1_down_2',
-                'hero_attack1_down_3',
-                'hero_attack1_down_4',
-                'hero_attack1_down_5',
-                'hero_attack1_down_6',
-                'hero_attack1_down_7',
-                'hero_attack1_down_8',
-            ]
-        },
-        'hero_attack1_up': {
-            framerate: 8,
-            frames: [
-                'hero_attack1_up_1',
-                'hero_attack1_up_2',
-                'hero_attack1_up_3',
-                'hero_attack1_up_4',
-                'hero_attack1_up_5',
-                'hero_attack1_up_6',
-                'hero_attack1_up_7',
-                'hero_attack1_up_8',
-            ]
-        },
-        'hero_attack1_left': {
-            framerate: 8,
-            frames: [
-                'hero_attack1_left_1',
-                'hero_attack1_left_2',
-                'hero_attack1_left_3',
-                'hero_attack1_left_4',
-                'hero_attack1_left_5',
-                'hero_attack1_left_6',
-                'hero_attack1_left_7',
-                'hero_attack1_left_8',
-            ]
-        },
-        'hero_attack1_right': {
-            framerate: 8,
-            frames: [
-                'hero_attack1_right_1',
-                'hero_attack1_right_2',
-                'hero_attack1_right_3',
-                'hero_attack1_right_4',
-                'hero_attack1_right_5',
-                'hero_attack1_right_6',
-                'hero_attack1_right_7',
-                'hero_attack1_right_8',
-            ]
-        },
-        'hero_idle_down': {
-            framerate: 1,
-            frames: [
-                'hero_idle_down_1',
-                'hero_idle_down_2',
-                'hero_idle_down_3',
-                'hero_idle_down_4',
-                'hero_idle_down_5',
-                'hero_idle_down_6',
-                'hero_idle_down_7',
-                'hero_idle_down_8',
-            ]
-        },
-        'hero_idle_up': {
-            framerate: 1,
-            frames: [
-                'hero_idle_up_1',
-                'hero_idle_up_2',
-                'hero_idle_up_3',
-                'hero_idle_up_4',
-                'hero_idle_up_5',
-                'hero_idle_up_6',
-                'hero_idle_up_7',
-                'hero_idle_up_8',
-            ]
-        },
-        'hero_idle_left': {
-            framerate: 1,
-            frames: [
-                'hero_idle_left_1',
-                'hero_idle_left_2',
-                'hero_idle_left_3',
-                'hero_idle_left_4',
-                'hero_idle_left_5',
-                'hero_idle_left_6',
-                'hero_idle_left_7',
-                'hero_idle_left_8',
-            ]
-        },
-        'hero_idle_right': {
-            framerate: 1,
-            frames: [
-                'hero_idle_right_1',
-                'hero_idle_right_2',
-                'hero_idle_right_3',
-                'hero_idle_right_4',
-                'hero_idle_right_5',
-                'hero_idle_right_6',
-                'hero_idle_right_7',
-                'hero_idle_right_8',
-            ]
-        },
-        'hero_run_down': {
-            framerate: 1,
-            frames: [
-                'hero_run_down_1',
-                'hero_run_down_2',
-                'hero_run_down_3',
-                'hero_run_down_4',
-                'hero_run_down_5',
-                'hero_run_down_6',
-                'hero_run_down_7',
-                'hero_run_down_8',
-            ]
-        },
-        'hero_run_up': {
-            framerate: 1,
-            frames: [
-                'hero_run_up_1',
-                'hero_run_up_2',
-                'hero_run_up_3',
-                'hero_run_up_4',
-                'hero_run_up_5',
-                'hero_run_up_6',
-                'hero_run_up_7',
-                'hero_run_up_8',
-            ]
-        },
-        'hero_run_left': {
-            framerate: 1,
-            frames: [
-                'hero_run_left_1',
-                'hero_run_left_2',
-                'hero_run_left_3',
-                'hero_run_left_4',
-                'hero_run_left_5',
-                'hero_run_left_6',
-                'hero_run_left_7',
-                'hero_run_left_8',
-            ]
-        },
-        'hero_run_right': {
-            framerate: 1,
-            frames: [
-                'hero_run_right_1',
-                'hero_run_right_2',
-                'hero_run_right_3',
-                'hero_run_right_4',
-                'hero_run_right_5',
-                'hero_run_right_6',
-                'hero_run_right_7',
-                'hero_run_right_8',
-            ]
-        },
+        'hero_attack1_down': [
+            'hero_attack1_down_1',
+            'hero_attack1_down_2',
+            'hero_attack1_down_3',
+            'hero_attack1_down_4',
+            'hero_attack1_down_5',
+            'hero_attack1_down_6',
+            'hero_attack1_down_7',
+            'hero_attack1_down_8',
+        ],
+        'hero_attack1_up': [
+            'hero_attack1_up_1',
+            'hero_attack1_up_2',
+            'hero_attack1_up_3',
+            'hero_attack1_up_4',
+            'hero_attack1_up_5',
+            'hero_attack1_up_6',
+            'hero_attack1_up_7',
+            'hero_attack1_up_8',
+        ],
+        'hero_attack1_left': [
+            'hero_attack1_left_1',
+            'hero_attack1_left_2',
+            'hero_attack1_left_3',
+            'hero_attack1_left_4',
+            'hero_attack1_left_5',
+            'hero_attack1_left_6',
+            'hero_attack1_left_7',
+            'hero_attack1_left_8',
+        ],
+        'hero_attack1_right': [
+            'hero_attack1_right_1',
+            'hero_attack1_right_2',
+            'hero_attack1_right_3',
+            'hero_attack1_right_4',
+            'hero_attack1_right_5',
+            'hero_attack1_right_6',
+            'hero_attack1_right_7',
+            'hero_attack1_right_8',
+        ],
+        'hero_idle_down': [
+            'hero_idle_down_1',
+            'hero_idle_down_2',
+            'hero_idle_down_3',
+            'hero_idle_down_4',
+            'hero_idle_down_5',
+            'hero_idle_down_6',
+            'hero_idle_down_7',
+            'hero_idle_down_8',
+        ],
+        'hero_idle_up': [
+            'hero_idle_up_1',
+            'hero_idle_up_2',
+            'hero_idle_up_3',
+            'hero_idle_up_4',
+            'hero_idle_up_5',
+            'hero_idle_up_6',
+            'hero_idle_up_7',
+            'hero_idle_up_8',
+        ],
+        'hero_idle_left': [
+            'hero_idle_left_1',
+            'hero_idle_left_2',
+            'hero_idle_left_3',
+            'hero_idle_left_4',
+            'hero_idle_left_5',
+            'hero_idle_left_6',
+            'hero_idle_left_7',
+            'hero_idle_left_8',
+        ],
+        'hero_idle_right': [
+            'hero_idle_right_1',
+            'hero_idle_right_2',
+            'hero_idle_right_3',
+            'hero_idle_right_4',
+            'hero_idle_right_5',
+            'hero_idle_right_6',
+            'hero_idle_right_7',
+            'hero_idle_right_8',
+        ],
+        'hero_run_down': [
+            'hero_run_down_1',
+            'hero_run_down_2',
+            'hero_run_down_3',
+            'hero_run_down_4',
+            'hero_run_down_5',
+            'hero_run_down_6',
+            'hero_run_down_7',
+            'hero_run_down_8',
+        ],
+        'hero_run_up': [
+            'hero_run_up_1',
+            'hero_run_up_2',
+            'hero_run_up_3',
+            'hero_run_up_4',
+            'hero_run_up_5',
+            'hero_run_up_6',
+            'hero_run_up_7',
+            'hero_run_up_8',
+        ],
+        'hero_run_left': [
+            'hero_run_left_1',
+            'hero_run_left_2',
+            'hero_run_left_3',
+            'hero_run_left_4',
+            'hero_run_left_5',
+            'hero_run_left_6',
+            'hero_run_left_7',
+            'hero_run_left_8',
+        ],
+        'hero_run_right': [
+            'hero_run_right_1',
+            'hero_run_right_2',
+            'hero_run_right_3',
+            'hero_run_right_4',
+            'hero_run_right_5',
+            'hero_run_right_6',
+            'hero_run_right_7',
+            'hero_run_right_8',
+        ],
     };
 
     /**
@@ -195,19 +157,13 @@ export class Player extends Entity {
      */
     draw(ctx) {
         var animation = this.animations[this.animationName];
-        if (!animation) {
-            console.error(`Player: Ошибка! Анимация "${this.animationName}" не найдена`);
-            return;
+        if (this.frameNumber === animation.length) {
+            this.frameNumber = 0;
         }
 
-        if (this.frameCounter === animation.framerate) {
-            this.frameCounter = 0;
-            this.frameNumber = (this.frameNumber + 1) % animation.frames.length;
-        }
-
-        var currentFrame = animation.frames[this.frameNumber];
+        var currentFrame = animation[this.frameNumber];
         spriteManager.drawSprite(ctx, currentFrame, this.pos_x, this.pos_y);
-        this.frameCounter++;
+        this.frameNumber++;
     }
 
     /**
@@ -259,7 +215,10 @@ export class Player extends Entity {
      */
     onTouchEntity(obj) {
         // TODO: реализовать логику столкновения с сущностями
-        console.log("Player: onTouchEntity", obj.name);
+        if (obj.name.includes("Money") && !obj.isDead) {
+            this.points += obj.bonus;
+            obj.kill();
+        }
     }
 
     /**
