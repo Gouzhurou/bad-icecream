@@ -18,7 +18,6 @@ export class Money extends Entity {
      * @param {CanvasRenderingContext2D} ctx - контекст canvas
      */
     draw(ctx) {
-        console.log("Отрисовка монеты");
         spriteManager.drawSprite(ctx, "money64", this.pos_x, this.pos_y);
     }
 

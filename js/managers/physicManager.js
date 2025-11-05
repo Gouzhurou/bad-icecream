@@ -21,9 +21,6 @@ export var physicManager = {
         var newX = obj.pos_x + Math.floor(obj.move_x * obj.speed);
         var newY = obj.pos_y + Math.floor(obj.move_y * obj.speed);
 
-        console.log(`Old coordinates: ${obj.pos_x}: ${obj.pos_y}`);
-        console.log(`New coordinates: ${newX}: ${newY}`);
-
         var entity = this.entityAtXY(obj, newX, newY);
         if (entity !== null && obj.onTouchEntity) {
             obj.onTouchEntity(entity);
@@ -59,7 +56,7 @@ export var physicManager = {
         for (var i = 0; i < gameManager.entities.length; i++) {
             var e = gameManager.entities[i];
             if (e.name !== obj.name) {
-                // переписать эту хуйню
+                // TODO: переписать, GreenMonster касается объектов по 2 раза при повороте
                 if (
                     x + obj.size_x < e.pos_x ||
                     y + obj.size_y < e.pos_y ||

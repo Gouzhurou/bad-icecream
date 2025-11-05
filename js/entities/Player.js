@@ -12,7 +12,7 @@ export class Player extends Entity {
     /** @type {number} - направление по Y */
     direction_y = 1;
     /** @type {number} - скорость движения */
-    speed = 8;
+    speed = 10;
     /** @type {number} - количество бонусов */
     bonus = 0;
     /** @type {string} - имя текущей анимации */
@@ -194,34 +194,20 @@ export class Player extends Entity {
      * @param {CanvasRenderingContext2D} ctx - контекст canvas
      */
     draw(ctx) {
-        console.log(`Player: Начало отрисовки. Анимация: "${this.animationName}", Кадр: ${this.frameNumber}, Счетчик: ${this.frameCounter}`);
-
         var animation = this.animations[this.animationName];
         if (!animation) {
             console.error(`Player: Ошибка! Анимация "${this.animationName}" не найдена`);
-            console.log('Player: Доступные анимации:', Object.keys(this.animations));
             return;
         }
 
-        console.log(`Player: Анимация найдена. Framerate: ${animation.framerate}, Количество кадров: ${animation.frames.length}`);
-
         if (this.frameCounter === animation.framerate) {
-            console.log(`Player: Смена кадра! Текущий кадр: ${this.frameNumber}`);
-
             this.frameCounter = 0;
             this.frameNumber = (this.frameNumber + 1) % animation.frames.length;
-
-            console.log(`Player: Новый кадр: ${this.frameNumber}, Имя кадра: "${animation.frames[this.frameNumber]}"`);
         }
 
         var currentFrame = animation.frames[this.frameNumber];
-        console.log(`Player: Отрисовка кадра "${currentFrame}" на позиции (${this.pos_x}, ${this.pos_y})`);
-
         spriteManager.drawSprite(ctx, currentFrame, this.pos_x, this.pos_y);
-
-        var oldCounter = this.frameCounter;
         this.frameCounter++;
-        console.log(`Player: Счетчик кадров увеличен: ${oldCounter} -> ${this.frameCounter}`);
     }
 
     /**
@@ -264,7 +250,7 @@ export class Player extends Entity {
      */
     kill() {
         // TODO: реализовать логику смерти игрока
-        console.log("You are dead");
+        console.log("Player: You are dead");
     }
 
     /**
@@ -273,7 +259,7 @@ export class Player extends Entity {
      */
     onTouchEntity(obj) {
         // TODO: реализовать логику столкновения с сущностями
-        console.log("onTouchEntity", obj.name);
+        console.log("Player: onTouchEntity", obj.name);
     }
 
     /**

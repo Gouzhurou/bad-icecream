@@ -45,7 +45,6 @@ export var gameManager = {
      * @param {Entity} obj - объект для удаления
      */
     kill(obj) {
-        console.log(`GameManager: Добавление объекта в очередь на удаление: ${obj.name || 'Unknown'}`);
         this.laterKill.push(obj);
     },
 
@@ -58,10 +57,6 @@ export var gameManager = {
             return;
         }
 
-        // Логирование управления
-        const prevMoveX = this.player.move_x;
-        const prevMoveY = this.player.move_y;
-
         this.player.move_x = 0;
         this.player.move_y = 0;
 
@@ -71,12 +66,7 @@ export var gameManager = {
         if (eventsManager.action["right"]) this.player.move_x = 1;
         if (eventsManager.action["fire"]) this.player.fire();
 
-        if (this.player.move_x !== prevMoveX || this.player.move_y !== prevMoveY) {
-            console.log(`GameManager: Движение игрока - X: ${this.player.move_x}, Y: ${this.player.move_y}`);
-        }
-
         // Обновление сущностей
-        console.log(`GameManager: Обновление ${this.entities.length} сущностей`);
         this.entities.forEach(entity => {
             try {
                 entity.update();
@@ -87,11 +77,9 @@ export var gameManager = {
 
         // Удаление сущностей
         if (this.laterKill.length > 0) {
-            console.log(`GameManager: Удаление ${this.laterKill.length} сущностей`);
             this.laterKill.forEach(entity => {
                 var index = this.entities.indexOf(entity);
                 if (index > -1) {
-                    console.log(`GameManager: Удаление сущности ${entity.name || 'Unknown'} с индексом ${index}`);
                     this.entities.splice(index, 1);
                 } else {
                     console.warn('GameManager: Попытка удалить несуществующую сущность');
@@ -101,7 +89,6 @@ export var gameManager = {
         }
 
         // Отрисовка
-        console.log('GameManager: Отрисовка карты и сущностей');
         mapManager.centerAt(this.player.pos_x, this.player.pos_y);
         mapManager.draw(this.ctx);
         this.draw(this.ctx);
@@ -135,21 +122,13 @@ export var gameManager = {
             "./assets/images/atlas.png"
         );
 
-        console.log('GameManager: Регистрация фабрик объектов');
         gameManager.factory["Player"] = Player;
         gameManager.factory["GreenMonster"] = GreenMonster;
         gameManager.factory["Money"] = Money;
 
-        console.log('GameManager: Парсинг entities с карты');
         mapManager.parseEntities();
-
-        console.log('GameManager: Первоначальная отрисовка карты');
         mapManager.draw(this.ctx);
-
-        console.log('GameManager: Настройка менеджера событий');
         eventsManager.setup();
-
-        console.log('GameManager: Все ресурсы загружены');
     },
 
     /**
