@@ -1,6 +1,9 @@
 import { Entity } from "./Entity.js";
 import { spriteManager } from "../managers/spriteManager.js";
 import {physicManager} from "../managers/physicManager.js";
+import {mapManager} from "../managers/mapManager.js";
+import {gameManager, IceType} from "../core/gameManager.js";
+import {Ice} from "./Ice.js";
 
 export class Player extends Entity {
     /** @type {number} - движение по X */
@@ -142,6 +145,15 @@ export class Player extends Entity {
             'hero_run_right_8',
         ],
     };
+    /** @type {boolean} - Показывает на наличие текущего процесса огня */
+    isFireStarted = false;
+    fire_x = 0;
+    fire_y = 0;
+    fire_w = 0;
+    fire_h = 0;
+    fire_direction_x = 0;
+    fire_direction_y = 0;
+    isAddIce = true;
 
     /**
      * Создает экземпляр игрока
@@ -174,23 +186,15 @@ export class Player extends Entity {
 
         if (this.move_x === 1) {
             this.animationName = 'hero_run_right';
-            this.direction_y = 0;
-            this.direction_x = 1;
         }
         else if (this.move_x === -1) {
             this.animationName = 'hero_run_left';
-            this.direction_y = 0;
-            this.direction_x = -1;
         }
         else if (this.move_y === 1) {
             this.animationName = 'hero_run_down';
-            this.direction_x = 0;
-            this.direction_y = 1;
         }
         else if (this.move_y === -1) {
             this.animationName = 'hero_run_up';
-            this.direction_x = 0;
-            this.direction_y = -1;
         }
 
         if (this.move_y === 0 && this.move_x === 0) {
@@ -198,6 +202,19 @@ export class Player extends Entity {
             else if (this.direction_x === -1) this.animationName = 'hero_idle_left';
             else if (this.direction_y === 1) this.animationName = 'hero_idle_down';
             else if (this.direction_y === -1) this.animationName = 'hero_idle_up';
+        }
+
+        if (this.isFireStarted) {
+            if (this.isAddIce) {
+                this.addIce();
+            } else {
+                this.deleteIce();
+            }
+
+            if (this.isFireStarted) {
+                this.fire_x += this.fire_direction_x * mapManager.tSize.x;
+                this.fire_y += this.fire_direction_y * mapManager.tSize.y;
+            }
         }
     }
 
@@ -222,10 +239,96 @@ export class Player extends Entity {
     }
 
     /**
+     * Ищет координаты соседнего по направлению блока
+     * @return {Object} - координаты соседнего по направлению блока (в пикселях)
+     */
+    getNearlyBlock() {
+        var x = Math.floor((this.pos_x + this.direction_x * this.size_x) / mapManager.tSize.x);
+        var y = Math.floor((this.pos_y + this.direction_y * this.size_y) / mapManager.tSize.y);
+        if (this.pos_x % mapManager.tSize.x !== 0 && this.direction_x === 1) {
+            x += 1;
+        }
+        if (this.pos_y % mapManager.tSize.y !== 0 && this.direction_y === 1) {
+            y += 1;
+        }
+
+        return {
+            x: x * mapManager.tSize.x,
+            y: y * mapManager.tSize.y
+        };
+    }
+
+    /**
      * Добавляет или убирает, если уже есть, блоки льда по направлению движения
      */
     fire() {
-        // TODO: реализовать логику создания/удаления льда
-        console.log("Player fire method called");
+        if (!this.isFireStarted) {
+            let coordinates = this.getNearlyBlock();
+            this.fire_x = coordinates.x;
+            this.fire_y = coordinates.y;
+
+            this.fire_direction_x = this.direction_x;
+            this.fire_direction_y = this.direction_y;
+
+            var sprite = spriteManager.getSprite(Ice.getDefaultFrameName());
+            this.fire_w = sprite.w;
+            this.fire_h = sprite.h;
+
+            var ices = gameManager.getIceAtXY(this.fire_x, this.fire_y, this.fire_w, this.fire_h);
+            this.isAddIce = ices.length === 0;
+
+            this.isFireStarted = true;
+        }
+    }
+
+    /**
+     * Устанавливает значения по умолчанию для полей, используемых для реализации выстрела
+     */
+    setDefaultFireState() {
+        this.isFireStarted = false;
+        this.fire_x = 0;
+        this.fire_y = 0;
+        this.fire_w = 0;
+        this.fire_h = 0;
+        this.fire_direction_x = 0;
+        this.fire_direction_y = 0;
+    }
+
+    /**
+     * Добавляет блок льда на позицию, указанной в соответствующих полях
+     */
+    addIce() {
+        var entities = gameManager.getEntitiesAtXY(this.fire_x, this.fire_y, this.fire_w, this.fire_h);
+        var allAreMoney = gameManager.allAreMoney(entities);
+        var isWall = mapManager.isTileWall(this.fire_x, this.fire_y);
+        if (isWall || (entities.length !== 0 && !allAreMoney)) {
+            this.setDefaultFireState();
+            return;
+        }
+
+        gameManager.addEntityWithInfo(
+            IceType,
+            IceType + gameManager.iceCounter + 1,
+            this.fire_x,
+            this.fire_y,
+            this.fire_w,
+            this.fire_h
+        );
+    }
+
+    /**
+     * Удаляет блок льда на позиции, указанной в соответствующих полях
+     */
+    deleteIce() {
+        var ices = gameManager.getIceAtXY(this.fire_x, this.fire_y, this.fire_w, this.fire_h);
+        var isWall = mapManager.isTileWall(this.fire_x, this.fire_y);
+        if (ices.length === 0 || isWall) {
+            this.setDefaultFireState();
+            return;
+        }
+
+        for (var i = 0; i < ices.length; i++) {
+            ices[i].kill();
+        }
     }
 }

@@ -39,20 +39,21 @@ export class Money extends Entity {
     }
 
     /**
-     * Отрисовывает деньги
-     * @param {CanvasRenderingContext2D} ctx - контекст canvas
+     * Отображает сущность в контексте
+     * @param {CanvasRenderingContext2D} ctx - контекст canvas для отрисовки
      */
     draw(ctx) {
-        var animation = this.animations[this.animationName];
+        const animation = this.animations[this.animationName];
         if (this.frameNumber === animation.length) {
             if (this.isDead) {
                 gameManager.kill(this);
+                return;
             } else {
                 this.frameNumber = 0;
             }
         }
 
-        var currentFrame = animation[this.frameNumber];
+        const currentFrame = animation[this.frameNumber];
         spriteManager.drawSprite(ctx, currentFrame, this.pos_x, this.pos_y);
         this.frameNumber++;
     }

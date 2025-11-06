@@ -8,6 +8,11 @@ import {GreenMonster} from "../entities/GreenMonster.js";
 import {Money} from "../entities/Money.js";
 import {Ice} from "../entities/Ice.js";
 
+export const IceType = "Ice";
+export const PlayerType = "Player";
+export const GreenMonsterType = "GreenMonster";
+export const MoneyType = "Money";
+
 export var gameManager = {
     /** @type {Object<string, Entity>} - эталонные объекты, которые используются для
      * создания объектов, размещающихся на карте */
@@ -19,6 +24,9 @@ export var gameManager = {
     /** @type {Player} - объект, хранящий игрока */
     player: null,
 
+    /** @type {boolean} - true, если игрок находится в процессе выстрела */
+    hasFire: false,
+
     /** @type {CanvasRenderingContext2D} - Контекст canvas для отрисовки */
     ctx: null,
 
@@ -27,6 +35,114 @@ export var gameManager = {
 
     /** @type {number} - текущий уровень */
     level: 1,
+
+    /** @type {number} - количество объектов с типом Ice */
+    iceCounter: 0,
+
+    /**
+     * Добавляет сущность в игру
+     * @param {string} type - тип сущности
+     * @param {string} name - имя сущности
+     * @param {number} x - X-координата сущности (в пикселях)
+     * @param {number} y - Y-координата сущности (в пикселях)
+     * @param {number} width - ширина сущности (в пикселях)
+     * @param {number} height - высота сущности (в пикселях)
+     */
+    addEntityWithInfo(type, name, x, y, width, height) {
+        if (!this.factory[type])
+        {
+            console.warn(`GameManager: Фабрика для типа "${type}" не найдена`);
+            return;
+        }
+        let obj = new this.factory[type];
+        obj.name = name;
+        obj.pos_x = x;
+        obj.pos_y = y;
+        obj.size_x = width;
+        obj.size_y = height;
+
+        this.addEntityWithEntity(obj);
+
+        if (type === PlayerType) {
+            this.initPlayer(obj);
+        }
+    },
+
+    /**
+     * Добавляет сущность в игру
+     * @param {Entity} entity - сущность
+     */
+    addEntityWithEntity(entity) {
+        if (entity.name.includes(IceType)) {
+            gameManager.iceCounter++;
+        }
+
+        this.entities.push(entity);
+    },
+
+    /**
+     * Находит сущности, с которыми имеется столкновение
+     * @param obj - объект
+     * @param x - X-координата, определяющая местоположение объекта
+     * @param y - Y-координата, определяющая местоположение объекта
+     * @return {Array[Object]} - Массив объектов, с которыми имеется столкновение (не учитывая сам объект)
+     */
+    getEntitiesTouchingObject(obj, x, y) {
+        let entities = this.getEntitiesAtXY(x, y, obj.size_x, obj.size_y);
+        entities = entities.filter(entity =>
+            entity.name !== obj.name
+        );
+        return entities;
+    },
+
+    /**
+     * Находит сущностей, находящихся в блоке с координатами (x; y) и размерами (width; height)
+     * @param {number} x - X-координата блока на карте (в пикселях)
+     * @param {number} y - Y-координата блока на карте (в пикселях)
+     * @param {number} width - ширина блока (в пикселях)
+     * @param {number} height - высота блока (в пикселях)
+     * @return {Array[Entity]} - массив сущностей, касающихся блока с координатами (x; y)
+     */
+    getEntitiesAtXY(x, y, width, height) {
+        let entities = [];
+        for (let i = 0; i < this.entities.length; i++) {
+            let entity = this.entities[i];
+            if (
+                entity.name.includes(MoneyType) && entity.isDead ||
+                entity.pos_x + entity.size_x <= x ||
+                entity.pos_y + entity.size_y <= y ||
+                entity.pos_x >= x + width ||
+                entity.pos_y >= y + height
+            ) {
+                continue;
+            }
+            entities.push(entity);
+        }
+        return entities;
+    },
+
+    /**
+     * Получает все объекты с типом Ice в блоке с координатами (x: y) и размерами (width: height)
+     * @param {number} x - X-координата блока (в пикселях)
+     * @param {number} y - Y-координата блока (в пикселях)
+     * @param {number} width - ширина блока (в пикселях)
+     * @param {number} height - высота блока (в пикселях)
+     * @return {Array[Entity]} - массив объектов Entity с типом Ice
+     */
+    getIceAtXY(x, y, width, height) {
+        var ices = this.getEntitiesAtXY(x, y, width, height);
+        ices = ices.filter(entity => entity.name.includes(IceType));
+        return ices;
+    },
+
+    /**
+     * Проверяет, имеют ли все сущности тип Money
+     * @param entities - массив сущностей
+     * @return {boolean} - true, если все сущности имеют тип Money
+     */
+    allAreMoney(entities) {
+        return entities.every(entity => entity.name.includes(MoneyType));
+    },
 
     /**
      * Инициализирует canvas элемент
@@ -66,11 +182,33 @@ export var gameManager = {
         this.player.move_x = 0;
         this.player.move_y = 0;
 
-        if (eventsManager.action["up"]) this.player.move_y = -1;
-        if (eventsManager.action["down"]) this.player.move_y = 1;
-        if (eventsManager.action["left"]) this.player.move_x = -1;
-        if (eventsManager.action["right"]) this.player.move_x = 1;
-        if (eventsManager.action["fire"]) this.player.fire();
+        if (eventsManager.action["up"])  {
+            this.player.direction_y = -1;
+            this.player.direction_x = 0;
+            this.player.move_y = -1;
+        }
+        if (eventsManager.action["down"]) {
+            this.player.direction_y = 1;
+            this.player.direction_x = 0;
+            this.player.move_y = 1;
+        }
+        if (eventsManager.action["left"]) {
+            this.player.direction_y = 0;
+            this.player.direction_x = -1;
+            this.player.move_x = -1;
+        }
+        if (eventsManager.action["right"]) {
+            this.player.direction_y = 0;
+            this.player.direction_x = 1;
+            this.player.move_x = 1;
+        }
+        if (eventsManager.action["fire"] && !this.hasFire) {
+            this.hasFire = true;
+            this.player.fire();
+        }
+        if (!eventsManager.action["fire"] && this.hasFire) {
+            this.hasFire = false;
+        }
 
         // Обновление сущностей
         this.entities.forEach(entity => {
@@ -84,7 +222,7 @@ export var gameManager = {
         // Удаление сущностей
         if (this.laterKill.length > 0) {
             this.laterKill.forEach(entity => {
-                var index = this.entities.indexOf(entity);
+                const index = this.entities.indexOf(entity);
                 if (index > -1) {
                     this.entities.splice(index, 1);
                 } else {
@@ -106,11 +244,11 @@ export var gameManager = {
      * @param {CanvasRenderingContext2D} ctx - Контекст canvas для отрисовки
      */
     draw(ctx) {
-        for (var i = 0; i < this.entities.length; i++) {
+        for (let i = 0; i < this.entities.length; i++) {
             try {
-                if (this.entities[i].name !== "Player") this.entities[i].draw(ctx);
+                if (this.entities[i].name !== PlayerType) this.entities[i].draw(ctx);
             } catch (e) {
-                console.error(`GameManager: Ошибка при отрисовке сущности ${i}:`, e);
+                console.error(`GameManager: Ошибка при отображении сущности ${i}:`, e);
             }
         }
         this.player.draw(ctx);
@@ -128,10 +266,10 @@ export var gameManager = {
             "./assets/images/atlas.png"
         );
 
-        gameManager.factory["Player"] = Player;
-        gameManager.factory["GreenMonster"] = GreenMonster;
-        gameManager.factory["Money"] = Money;
-        gameManager.factory["Ice"] = Ice;
+        gameManager.factory[PlayerType] = Player;
+        gameManager.factory[GreenMonsterType] = GreenMonster;
+        gameManager.factory[MoneyType] = Money;
+        gameManager.factory[IceType] = Ice;
 
         mapManager.parseEntities();
         mapManager.draw(this.ctx);
@@ -142,7 +280,7 @@ export var gameManager = {
      * Запуск игры
      */
     play() {
-        setInterval(updateWorld, 150);
+        setInterval(updateWorld, 100);
     },
 };
 

@@ -168,24 +168,14 @@ export var mapManager = {
                     for (var j = 0; j < entities.length; j++) {
                         var entity = entities[j];
                         try {
-                            if (!gameManager.factory[entity.type]) {
-                                console.warn(`MapManager: Фабрика для типа "${entity.type}" не найдена`);
-                                continue;
-                            }
-
-                            var obj = new gameManager.factory[entity.type];
-                            obj.name = entity.name;
-                            obj.pos_x = entity.x;
-                            obj.pos_y = entity.y;
-                            obj.size_x = entity.width;
-                            obj.size_y = entity.height;
-
-                            gameManager.entities.push(obj);
-
-                            if (obj.name === "Player") {
-                                gameManager.initPlayer(obj);
-                            }
-
+                            gameManager.addEntityWithInfo(
+                                entity.type,
+                                entity.name,
+                                entity.x,
+                                entity.y,
+                                entity.width,
+                                entity.height,
+                            );
                         } catch (e) {
                             console.error(`MapManager: Ошибка при создании сущности [${entity.gid}] ${entity.type}:`, e);
                         }
@@ -297,9 +287,22 @@ export var mapManager = {
      * @param {number} y - Y-координата тайла на карте (в пикселях)
      * @return {number} индекс тайла
      */
-    getTilesetIndex(x, y) {
-        const index = Math.floor(y / this.tSize.y) * this.xCount + Math.floor(x / this.tSize.x);
+    getTilesetWallIndex(x, y) {
+        var tile_x = Math.floor(x / this.tSize.x);
+        var tile_y = Math.floor(y / this.tSize.y);
+        const index = tile_y * this.xCount + tile_x;
         return this.wallsLayer.data[index];
+    },
+
+    /**
+     * Определяет, если тайл является стеной
+     * @param {number} x - X-координата тайла на карте (в пикселях)
+     * @param {number} y - Y-координата тайла на карте (в пикселях)
+     * @return {boolean} true, если тайл является стеной, false иначе
+     */
+    isTileWall(x, y) {
+        var index = this.getTilesetWallIndex(x, y);
+        return this.wallsIndices.includes(index);
     },
 
     /**
