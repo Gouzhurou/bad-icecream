@@ -1,10 +1,12 @@
 import {eventsManager} from "../managers/eventsManager.js";
 import {mapManager} from "../managers/mapManager.js";
 import {spriteManager} from "../managers/spriteManager.js";
+import {infoManager} from "../managers/infoManager.js";
+
 import {Player} from '../entities/Player.js';
 import {GreenMonster} from "../entities/GreenMonster.js";
 import {Money} from "../entities/Money.js";
-import {infoManager} from "../managers/infoManager.js";
+import {Ice} from "../entities/Ice.js";
 
 export var gameManager = {
     /** @type {Object<string, Entity>} - эталонные объекты, которые используются для
@@ -22,6 +24,9 @@ export var gameManager = {
 
     /** @type {Entity[]} - список объектов, которых нужно удалить позже */
     laterKill: [],
+
+    /** @type {number} - текущий уровень */
+    level: 1,
 
     /**
      * Инициализирует canvas элемент
@@ -101,7 +106,6 @@ export var gameManager = {
      * @param {CanvasRenderingContext2D} ctx - Контекст canvas для отрисовки
      */
     draw(ctx) {
-        console.log(`GameManager: Отрисовка ${this.entities.length} сущностей`);
         for (var i = 0; i < this.entities.length; i++) {
             try {
                 if (this.entities[i].name !== "Player") this.entities[i].draw(ctx);
@@ -127,6 +131,7 @@ export var gameManager = {
         gameManager.factory["Player"] = Player;
         gameManager.factory["GreenMonster"] = GreenMonster;
         gameManager.factory["Money"] = Money;
+        gameManager.factory["Ice"] = Ice;
 
         mapManager.parseEntities();
         mapManager.draw(this.ctx);
@@ -137,7 +142,7 @@ export var gameManager = {
      * Запуск игры
      */
     play() {
-        setInterval(updateWorld, 100);
+        setInterval(updateWorld, 150);
     },
 };
 

@@ -17,7 +17,6 @@ export var infoManager = {
      * @param {number} points - количество очков игрока
      */
     drawPoints(ctx, points) {
-        console.log("infoManager: draw points");
         let pointsStr = points.toString();
 
         if (pointsStr.length > this.maxDigitCount) {

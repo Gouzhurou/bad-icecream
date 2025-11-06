@@ -33,15 +33,17 @@ export var mapManager = {
     tLayer: [],
     tLayerCount: 0,
     /** @type {TileLayer} */
-    iceLayer: {},
-    /** @type {TileLayer} */
     wallsLayer: {},
-    /** @type {TileLayer} */
-    backgroundLayer: {},
-    xCount: 0, // в тайлах
-    yCount: 0, // в тайлах
-    tSize: {x: 64, y: 64}, // в пикселях
-    mapSize: {x: 64, y: 64}, // в пикселях
+    /** @type {number[]} - массив индексов стен */
+    wallsIndices: [],
+    /** @type {number} - размер карты по ширине (в тайлах) */
+    xCount: 0,
+    /** @type {number} - размер карты по высоте (в тайлах) */
+    yCount: 0,
+    /** @type {Object} - размер тайла (в пикселях) */
+    tSize: {x: 64, y: 64},
+    /** @type {Object} - размер карты (в пикселях) */
+    mapSize: {x: 64, y: 64},
     /** @type {Tileset[]} */
     tilesets: [],
     imgLoadCount: 0,
@@ -51,7 +53,6 @@ export var mapManager = {
         x: 0, y: 0,
         w: document.getElementById("gameCanvas").width,
         h: document.getElementById("gameCanvas").height},
-    iceIndex: 0,
 
     /**
      * Загружает JSON карты с сервера
@@ -94,13 +95,13 @@ export var mapManager = {
 
         for (var i = 0; i < this.mapData.layers.length; i++) {
             var layer = this.mapData.layers[i];
-
             if (layer.type === tileLayerType) {
                 this.tLayer[this.tLayerCount++] = layer;
                 tileLayerCount++;
-                if (layer.name === "walls") this.wallsLayer = layer;
-                if (layer.name === "ice") this.iceLayer = layer;
-                if (layer.name === "background") this.backgroundLayer = layer;
+                if (layer.name === "walls") {
+                    this.wallsLayer = layer;
+                    this.wallsIndices = [...new Set(this.wallsLayer.data)].filter(i => i !== 0);
+                }
             }
         }
 
@@ -111,12 +112,6 @@ export var mapManager = {
         this.tSize.y = this.mapData.tileheight;
         this.mapSize.x = this.xCount * this.tSize.x;
         this.mapSize.y = this.yCount * this.tSize.y;
-
-        // Поиск тайлсета льда
-        const iceTileset = this.mapData.tilesets.find(ts => ts.name === "ice");
-        if (iceTileset) {
-            this.iceIndex = iceTileset.firstgid;
-        }
 
         for (var i = 0; i < this.mapData.tilesets.length; i++) {
             var tileset = this.mapData.tilesets[i];
@@ -165,7 +160,10 @@ export var mapManager = {
         } else {
             for (var i = 0; i < this.mapData.layers.length; i++) {
                 var layer = this.mapData.layers[i];
-                if (layer.type === objectLayerType) {
+                if (
+                    layer.type === objectLayerType &&
+                    (layer.name === "ice" || layer.name === "level" + gameManager.level)
+                ) {
                     var entities = layer.objects;
                     for (var j = 0; j < entities.length; j++) {
                         var entity = entities[j];
@@ -301,33 +299,7 @@ export var mapManager = {
      */
     getTilesetIndex(x, y) {
         const index = Math.floor(y / this.tSize.y) * this.xCount + Math.floor(x / this.tSize.x);
-        const iceIndex = this.iceLayer.data[index];
-        if (iceIndex > 0) { return iceIndex; }
-        const wallIndex = this.wallsLayer.data[index];
-        if (wallIndex > 0) { return wallIndex; }
-        return this.backgroundLayer.data[index];
-    },
-
-    // сделать установку и удаление только блоков льда
-
-    /**
-     * Устанавливает тайл льда на карту
-     * @param {number} x - X-координата тайла на карте в тайлах
-     * @param {number} y - Y-координата тайла на карте в тайлах
-     */
-    setIceTile(x, y) {
-        const index = y * this.xCount + x;
-        this.iceLayer.data[index] = this.iceIndex;
-    },
-
-    /**
-     * Удаляет тайл льда с карты
-     * @param {number} x - X-координата тайла на карте в тайлах
-     * @param {number} y - Y-координата тайла на карте в тайлах
-     */
-    deleteIceTile(x, y) {
-        const index = y * this.xCount + x;
-        this.iceLayer.data[index] = 0;
+        return this.wallsLayer.data[index];
     },
 
     /**

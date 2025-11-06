@@ -8,7 +8,7 @@ export class GreenMonster extends Entity {
     /** @type {number} - движение по Y */
     move_y = 0;
     /** @type {number} - скорость движения */
-    speed = 6;
+    speed = 8;
     /** @type {string} - имя текущей анимации */
     animationName = "orange_cat_go_left";
     /** @type {number} - номер текущего фрейма в анимации */
@@ -99,7 +99,6 @@ export class GreenMonster extends Entity {
     onTouchEntity(obj) {
         if (obj.name.includes("Money"))
             return;
-        console.log("GreenMonster: onTouchEntity", obj);
         this.turnRight();
     }
 
@@ -107,7 +106,6 @@ export class GreenMonster extends Entity {
      * Обрабатывает столкновение с картой
      */
     onTouchMap() {
-        console.log("GreenMonster: onTouchMap");
         this.turnRight();
     }
 

@@ -12,7 +12,7 @@ export class Player extends Entity {
     /** @type {number} - направление по Y */
     direction_y = 1;
     /** @type {number} - скорость движения */
-    speed = 10;
+    speed = 16;
     /** @type {number} - количество бонусов */
     points = 0;
     /** @type {string} - имя текущей анимации */

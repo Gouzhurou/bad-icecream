@@ -1,8 +1,6 @@
 import {mapManager} from "./mapManager.js";
 import {gameManager} from "../core/gameManager.js";
 
-const WallsIndices = [1, 3, 4, 5, 6, 10, 12, 13, 14];
-
 /**
  * Объект для определения физики перемещений объектов
  * @namespace
@@ -21,27 +19,29 @@ export var physicManager = {
         var newX = obj.pos_x + Math.floor(obj.move_x * obj.speed);
         var newY = obj.pos_y + Math.floor(obj.move_y * obj.speed);
 
-        var entity = this.entityAtXY(obj, newX, newY);
-        if (entity !== null && obj.onTouchEntity) {
-            obj.onTouchEntity(entity);
+        var entities = this.entitiesAtXY(obj, newX, newY);
+        const allAreMoney = entities.every(entity => entity.name.includes("Money"));
+        if (entities.length !== 0 && obj.onTouchEntity) {
+            for (var i = 0; i < entities.length; i++) {
+                obj.onTouchEntity(entities[i]);
+            }
         }
 
         var index = mapManager.getTilesetIndex(
             newX + obj.size_x / 2,
             newY + obj.size_y / 2
         );
-        var isWall = WallsIndices.includes(index);
+        var isWall = mapManager.wallsIndices.includes(index);
         if (isWall && obj.onTouchMap) {
             obj.onTouchMap(index);
         }
 
-        if (!isWall) {
-            obj.pos_x = newX;
-            obj.pos_y = newY;
-        } else {
+        if (isWall || (entities.length !== 0 && !allAreMoney)) {
             return "break";
         }
 
+        obj.pos_x = newX;
+        obj.pos_y = newY;
         return "move";
     },
 
@@ -52,22 +52,24 @@ export var physicManager = {
      * @param y - Y-координата, определяющая местоположение объекта
      * @return {*|null} - Объект, с которым имеется столкновение, если оно есть
      */
-    entityAtXY(obj, x, y) {
+    entitiesAtXY(obj, x, y) {
+        var entities = [];
         for (var i = 0; i < gameManager.entities.length; i++) {
-            var e = gameManager.entities[i];
-            if (e.name !== obj.name) {
-                // TODO: переписать, GreenMonster касается объектов по 2 раза при повороте
+            var entity = gameManager.entities[i];
+            if (entity.name !== obj.name &&
+                !(entity.name.includes("Money") && entity.isDead)
+            ) {
                 if (
-                    x + obj.size_x < e.pos_x ||
-                    y + obj.size_y < e.pos_y ||
-                    x > e.pos_x + e.size_x ||
-                    y > e.pos_y + e.size_y
+                    x + obj.size_x <= entity.pos_x ||
+                    y + obj.size_y <= entity.pos_y ||
+                    x >= entity.pos_x + entity.size_x ||
+                    y >= entity.pos_y + entity.size_y
                 ) {
                     continue;
                 }
-                return e;
+                entities.push(entity);
             }
         }
-        return null;
+        return entities;
     },
 };
