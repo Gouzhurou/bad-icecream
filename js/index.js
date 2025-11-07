@@ -4,5 +4,5 @@ var canvas = document.getElementById('gameCanvas');
 var ctx = canvas.getContext('2d');
 
 gameManager.initContext(ctx);
-gameManager.loadAll();
+gameManager.loadAll(canvas);
 gameManager.play();

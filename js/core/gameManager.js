@@ -1,4 +1,4 @@
-import {eventsManager} from "../managers/eventsManager.js";
+import {DownStr, eventsManager, FireStr, LeftStr, RightStr, UpStr} from "../managers/eventsManager.js";
 import {mapManager} from "../managers/mapManager.js";
 import {spriteManager} from "../managers/spriteManager.js";
 import {infoManager} from "../managers/infoManager.js";
@@ -239,31 +239,31 @@ export var gameManager = {
         this.player.move_x = 0;
         this.player.move_y = 0;
 
-        if (eventsManager.action["up"])  {
+        if (eventsManager.action[UpStr])  {
             this.player.direction_y = -1;
             this.player.direction_x = 0;
             this.player.move_y = -1;
         }
-        if (eventsManager.action["down"]) {
+        if (eventsManager.action[DownStr]) {
             this.player.direction_y = 1;
             this.player.direction_x = 0;
             this.player.move_y = 1;
         }
-        if (eventsManager.action["left"]) {
+        if (eventsManager.action[LeftStr]) {
             this.player.direction_y = 0;
             this.player.direction_x = -1;
             this.player.move_x = -1;
         }
-        if (eventsManager.action["right"]) {
+        if (eventsManager.action[RightStr]) {
             this.player.direction_y = 0;
             this.player.direction_x = 1;
             this.player.move_x = 1;
         }
-        if (eventsManager.action["fire"] && !this.hasFire) {
+        if (eventsManager.action[FireStr] && !this.hasFire) {
             this.hasFire = true;
             this.player.fire();
         }
-        if (!eventsManager.action["fire"] && this.hasFire) {
+        if (!eventsManager.action[FireStr] && this.hasFire) {
             this.hasFire = false;
         }
 
@@ -320,8 +320,9 @@ export var gameManager = {
 
     /**
      * Загрузка данных игры
+     * @param {HTMLCanvasElement} canvas
      */
-    loadAll() {
+    loadAll(canvas) {
         console.log('GameManager: Начало загрузки всех ресурсов игры');
 
         mapManager.loadMap("./js/map.tmj");
@@ -339,7 +340,7 @@ export var gameManager = {
 
         mapManager.parseEntities();
         mapManager.draw(this.ctx);
-        eventsManager.setup();
+        eventsManager.setup(canvas);
     },
 
     /**
