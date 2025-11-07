@@ -147,12 +147,21 @@ export class Player extends Entity {
     };
     /** @type {boolean} - Показывает на наличие текущего процесса огня */
     isFireStarted = false;
+    /** @type {boolean} - Показывает на наличие анимации подачи игроком огня */
+    isFireAnimationStarted = false;
+    /** @type {number} - X-координата текущего льда */
     fire_x = 0;
+    /** @type {number} - Y-координата текущего льда */
     fire_y = 0;
+    /** @type {number} - ширина текущего льда */
     fire_w = 0;
+    /** @type {number} - высота текущего льда */
     fire_h = 0;
+    /** @type {number} - направление текущей волны льда по X */
     fire_direction_x = 0;
+    /** @type {number} - направление текущей волны льда по Y */
     fire_direction_y = 0;
+    /** @type {boolean} - Показывает, какое действие идет на данные момент в волне льда */
     isAddIce = true;
 
     /**
@@ -182,26 +191,35 @@ export class Player extends Entity {
      * Обновляет состояние игрока
      */
     update() {
-        physicManager.update(this);
+        if (this.isFireAnimationStarted) {
+            if (this.frameNumber === this.animations[this.animationName].length) {
+                this.isFireAnimationStarted = false;
+                this.frameNumber = 0;
+            }
+            this.frameNumber++;
+        }
+        if (!this.isFireAnimationStarted) {
+            physicManager.update(this);
 
-        if (this.move_x === 1) {
-            this.animationName = 'hero_run_right';
-        }
-        else if (this.move_x === -1) {
-            this.animationName = 'hero_run_left';
-        }
-        else if (this.move_y === 1) {
-            this.animationName = 'hero_run_down';
-        }
-        else if (this.move_y === -1) {
-            this.animationName = 'hero_run_up';
-        }
+            if (this.move_x === 1) {
+                this.animationName = 'hero_run_right';
+            }
+            else if (this.move_x === -1) {
+                this.animationName = 'hero_run_left';
+            }
+            else if (this.move_y === 1) {
+                this.animationName = 'hero_run_down';
+            }
+            else if (this.move_y === -1) {
+                this.animationName = 'hero_run_up';
+            }
 
-        if (this.move_y === 0 && this.move_x === 0) {
-            if (this.direction_x === 1) this.animationName = 'hero_idle_right';
-            else if (this.direction_x === -1) this.animationName = 'hero_idle_left';
-            else if (this.direction_y === 1) this.animationName = 'hero_idle_down';
-            else if (this.direction_y === -1) this.animationName = 'hero_idle_up';
+            if (this.move_y === 0 && this.move_x === 0) {
+                if (this.direction_x === 1) this.animationName = 'hero_idle_right';
+                else if (this.direction_x === -1) this.animationName = 'hero_idle_left';
+                else if (this.direction_y === 1) this.animationName = 'hero_idle_down';
+                else if (this.direction_y === -1) this.animationName = 'hero_idle_up';
+            }
         }
 
         if (this.isFireStarted) {
@@ -276,6 +294,13 @@ export class Player extends Entity {
 
             var ices = gameManager.getIceAtXY(this.fire_x, this.fire_y, this.fire_w, this.fire_h);
             this.isAddIce = ices.length === 0;
+
+            if (this.direction_x === 1) {this.animationName = 'hero_attack1_right';}
+            else if (this.direction_x === -1) {this.animationName = 'hero_attack1_left';}
+            else if (this.direction_y === 1) {this.animationName = 'hero_attack1_down'}
+            else if (this.direction_y === -1) {this.animationName = 'hero_attack1_up'}
+            this.frameNumber = 0;
+            this.isFireAnimationStarted = true;
 
             this.isFireStarted = true;
         }
