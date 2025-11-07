@@ -34,10 +34,31 @@ export var gameManager = {
     laterKill: [],
 
     /** @type {number} - текущий уровень */
-    level: 1,
+    levelNumber: 1,
+
+    /** @type {number} - считает максимальный бонус, который можно получить на уровне */
+    maxLevelBonus: 0,
+
+    /** @type {number} - frames per second */
+    FPS: 10,
+
+    /** @type {boolean} - идентификатор начала уровня */
+    isLevelStarting: true,
+
+    /** @type {number} - количество секунд для отображения надписи уровня */
+    levelDisplaySeconds: 2,
+
+    /** @type {number} - количество кадров для отображения надписи уровня */
+    levelDisplayFrames: 0,
+
+    /** @type {number} - счетчик кадров отображения уровня */
+    levelDisplayCounter: 0,
 
     /** @type {number} - количество объектов с типом Ice */
     iceCounter: 0,
+
+    /** @type {number|null} - идентификатор интервала */
+    intervalId: null,
 
     /**
      * Добавляет сущность в игру
@@ -75,6 +96,9 @@ export var gameManager = {
     addEntityWithEntity(entity) {
         if (entity.name.includes(IceType)) {
             gameManager.iceCounter++;
+        }
+        if (entity.name.includes(MoneyType)) {
+            gameManager.maxLevelBonus += entity.bonus;
         }
 
         this.entities.push(entity);
@@ -171,12 +195,45 @@ export var gameManager = {
     },
 
     /**
+     * Выполняет все необходимые действия для начала следующего уровня.
+     */
+    startNextLevel() {
+        this.levelNumber++;
+        this.isLevelStarting = true;
+        this.clearLevel();
+        mapManager.parseEntities();
+    },
+
+    /**
+     * Полная очистка уровня со сбросом счетчиков
+     */
+    clearLevel() {
+        this.player = null;
+        this.hasFire = false;
+
+        this.entities.forEach(entity => {
+            if (entity.cleanup) {
+                entity.cleanup();
+            }
+        });
+        this.entities.length = 0;
+
+        this.laterKill.length = 0;
+        this.iceCounter = 0;
+        this.maxLevelBonus = 0;
+    },
+
+    /**
      * Обновление игры на каждом такте
      */
     update() {
         if (this.player === null) {
             console.warn('GameManager: Игрок не инициализирован, пропуск обновления');
             return;
+        }
+
+        if (this.player.points === this.maxLevelBonus) {
+            this.startNextLevel();
         }
 
         this.player.move_x = 0;
@@ -232,11 +289,18 @@ export var gameManager = {
             this.laterKill.length = 0;
         }
 
-        // Отрисовка
         mapManager.centerAt(this.player.pos_x, this.player.pos_y);
         mapManager.draw(this.ctx);
         this.draw(this.ctx);
         infoManager.drawPoints(this.ctx, this.player.points);
+        if (this.isLevelStarting) {
+            infoManager.drawLevel(this.ctx, this.levelNumber);
+            this.levelDisplayCounter++;
+            if (this.levelDisplayCounter === this.levelDisplayFrames) {
+                this.levelDisplayCounter = 0;
+                this.isLevelStarting = false;
+            }
+        }
     },
 
     /**
@@ -266,6 +330,8 @@ export var gameManager = {
             "./assets/images/atlas.png"
         );
 
+        gameManager.levelDisplayFrames = gameManager.FPS * gameManager.levelDisplaySeconds;
+
         gameManager.factory[PlayerType] = Player;
         gameManager.factory[GreenMonsterType] = GreenMonster;
         gameManager.factory[MoneyType] = Money;
@@ -280,7 +346,7 @@ export var gameManager = {
      * Запуск игры
      */
     play() {
-        setInterval(updateWorld, 100);
+        this.intervalId = setInterval(() => updateWorld(), 100);
     },
 };
 

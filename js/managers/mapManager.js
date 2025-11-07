@@ -158,12 +158,17 @@ export var mapManager = {
             console.log('MapManager: Ресурсы еще не загружены, повторная попытка через 100мс');
             setTimeout(function () { mapManager.parseEntities(); }, 100);
         } else {
+            let levelLayerFound = false;
+
             for (var i = 0; i < this.mapData.layers.length; i++) {
                 var layer = this.mapData.layers[i];
                 if (
                     layer.type === objectLayerType &&
-                    (layer.name === "ice" || layer.name === "level" + gameManager.level)
+                    (layer.name === "ice" || layer.name === "level" + gameManager.levelNumber)
                 ) {
+                    if (layer.name === "level" + gameManager.levelNumber) {
+                        levelLayerFound = true;
+                    }
                     var entities = layer.objects;
                     for (var j = 0; j < entities.length; j++) {
                         var entity = entities[j];
@@ -181,6 +186,10 @@ export var mapManager = {
                         }
                     }
                 }
+            }
+
+            if (!levelLayerFound) {
+                // TODO: реализовать выход на главный экран
             }
         }
     },
