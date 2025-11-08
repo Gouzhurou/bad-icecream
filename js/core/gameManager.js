@@ -1,4 +1,11 @@
-import {DownStr, eventsManager, FireStr, LeftStr, RightStr, UpStr} from "../managers/eventsManager.js";
+import {
+    DownStr,
+    eventsManager,
+    FireStr,
+    LeftStr,
+    RightStr,
+    UpStr
+} from "../managers/eventsManager.js";
 import {mapManager} from "../managers/mapManager.js";
 import {spriteManager} from "../managers/spriteManager.js";
 import {infoManager} from "../managers/infoManager.js";
@@ -36,6 +43,9 @@ export var gameManager = {
     /** @type {number} - текущий уровень */
     levelNumber: 1,
 
+    /** @type {number} - текущее количество уровней в игре */
+    levelCount: 0,
+
     /** @type {number} - считает максимальный бонус, который можно получить на уровне */
     maxLevelBonus: 0,
 
@@ -59,6 +69,9 @@ export var gameManager = {
 
     /** @type {number|null} - идентификатор интервала */
     intervalId: null,
+
+    /** @type {boolean} - Показывает, включено ли меню */
+    isMenuActive: true,
 
     /**
      * Добавляет сущность в игру
@@ -224,6 +237,16 @@ export var gameManager = {
     },
 
     /**
+     * Запускает повтор уровня
+     */
+    runLevel() {
+        this.isMenuActive = false;
+        this.isLevelStarting = true;
+        this.clearLevel();
+        mapManager.parseEntities();
+    },
+
+    /**
      * Обновление игры на каждом такте
      */
     update() {
@@ -233,6 +256,10 @@ export var gameManager = {
         }
 
         if (this.player.points === this.maxLevelBonus) {
+            if (this.levelNumber === this.levelCount) {
+                this.menu();
+                return;
+            }
             this.startNextLevel();
         }
 
@@ -293,6 +320,7 @@ export var gameManager = {
         mapManager.draw(this.ctx);
         this.draw(this.ctx);
         infoManager.drawPoints(this.ctx, this.player.points);
+        infoManager.drawButtons(this.ctx);
         if (this.isLevelStarting) {
             infoManager.drawLevel(this.ctx, this.levelNumber);
             this.levelDisplayCounter++;
@@ -325,6 +353,7 @@ export var gameManager = {
     loadAll(canvas) {
         console.log('GameManager: Начало загрузки всех ресурсов игры');
 
+        // TODO: изменить содержимое файлов, один файл - один уровень
         mapManager.loadMap("./js/map.tmj");
         spriteManager.loadAtlas(
             "./assets/images/atlas.json",
@@ -339,15 +368,51 @@ export var gameManager = {
         gameManager.factory[IceType] = Ice;
 
         mapManager.parseEntities();
-        mapManager.draw(this.ctx);
         eventsManager.setup(canvas);
+        infoManager.setup();
+    },
+
+    /**
+     * Меню
+     */
+    menu() {
+        this.isMenuActive = true;
+        this.stopUpdates();
+        infoManager.drawMenu(this.ctx);
+    },
+
+    /**
+     * Пауза
+     */
+    pause() {
+        if (this.intervalId) {
+            this.stopUpdates();
+            infoManager.drawPause(this.ctx);
+        } else {
+            this.runUpdates();
+        }
+    },
+
+    /**
+     * Завершает обновления игры
+     */
+    stopUpdates() {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+    },
+
+    /**
+     * Начинает обновления игры
+     */
+    runUpdates() {
+        this.intervalId = setInterval(() => updateWorld(), 100);
     },
 
     /**
      * Запуск игры
      */
     play() {
-        this.intervalId = setInterval(() => updateWorld(), 100);
+        this.menu();
     },
 };
 

@@ -159,9 +159,14 @@ export var mapManager = {
             setTimeout(function () { mapManager.parseEntities(); }, 100);
         } else {
             let levelLayerFound = false;
+            gameManager.levelCount = 0;
 
             for (var i = 0; i < this.mapData.layers.length; i++) {
                 var layer = this.mapData.layers[i];
+                if (layer.name.includes("level")) {
+                    gameManager.levelCount++;
+                }
+
                 if (
                     layer.type === objectLayerType &&
                     (layer.name === "ice" || layer.name === "level" + gameManager.levelNumber)

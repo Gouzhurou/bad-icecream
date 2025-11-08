@@ -8,7 +8,7 @@ export class GreenMonster extends Entity {
     /** @type {number} - движение по Y */
     move_y = 0;
     /** @type {number} - скорость движения */
-    speed = 8;
+    speed = 4;
     /** @type {string} - имя текущей анимации */
     animationName = "orange_cat_go_left";
     /** @type {number} - номер текущего фрейма в анимации */

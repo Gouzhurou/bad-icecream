@@ -1,3 +1,6 @@
+import {infoManager} from "./infoManager.js";
+import {gameManager} from "../core/gameManager.js";
+
 const WKeyBoardCode = 87;
 const DKeyBoardCode = 65;
 const SKeyBoardCode = 83;
@@ -9,7 +12,10 @@ export const DownStr = 'down';
 export const LeftStr = 'left';
 export const RightStr = 'right';
 export const FireStr = 'fire';
-export const MouseClickStr = 'mouseClick';
+export const PauseStr = 'pause';
+export const RepeatStr = 'repeat';
+export const MenuStr = 'menu';
+export const LevelStr = 'level';
 
 /**
  * Объект для управления событиями
@@ -67,19 +73,61 @@ export var eventsManager = {
     onMouseDown(event) {
         eventsManager.mouseDown = true;
         const rect = eventsManager.canvas.getBoundingClientRect();
+        // координаты в видимой области
         eventsManager.mouseX = event.clientX - rect.left;
         eventsManager.mouseY = event.clientY - rect.top;
 
-        eventsManager.action[MouseClickStr] = true;
+        if (!gameManager.isMenuActive) {
+            for (let i = 0; i < infoManager.buttons.length; i++) {
+                const button = infoManager.buttons[i];
+                if (eventsManager.isButtonActive(button)) {
+                    if (button.name === PauseStr) {
+                        gameManager.pause();
+                    }
+                    else if (button.name === RepeatStr) {
+                        gameManager.runLevel();
+                    }
+                    else if (button.name === MenuStr) {
+                        gameManager.menu();
+                    }
+                }
+            }
+        } else {
+            for (let i = 0; i < infoManager.levelButtons.length; i++) {
+                const button = infoManager.levelButtons[i];
+                if (eventsManager.isButtonActive(button)) {
+                    if (button.name.startsWith(LevelStr)) {
+                        const levelNumber = parseInt(button.name.replace(LevelStr, ""));
+                        if (!isNaN(levelNumber)) {
+                            gameManager.levelNumber = levelNumber;
+                            gameManager.runLevel();
+                            gameManager.runUpdates();
+                        } else {
+                            console.warn(`Некорректный номер уровня в кнопке: ${button.name}`);
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    /**
+     * Определяет, активна ли кнопка
+     * @param {Entity} button - кнопка
+     * @return {boolean}
+     */
+    isButtonActive(button) {
+        return eventsManager.mouseX >= button.pos_x &&
+            eventsManager.mouseX <= button.pos_x + button.size_x &&
+            eventsManager.mouseY >= button.pos_y &&
+            eventsManager.mouseY <= button.pos_y + button.size_y;
     },
 
     /**
      * Обработчик отпускания мыши
-     * @param {MouseEvent} event
      */
-    onMouseUp(event) {
+    onMouseUp() {
         eventsManager.mouseDown = false;
-        eventsManager.action[MouseClickStr] = false;
     },
 
     /**
