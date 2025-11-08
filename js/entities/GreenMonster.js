@@ -1,6 +1,7 @@
 import { Entity } from './Entity.js';
 import { spriteManager } from "../managers/spriteManager.js";
 import {physicManager} from "../managers/physicManager.js";
+import {MoneyType} from "../core/gameManager.js";
 
 export class GreenMonster extends Entity {
     /** @type {number} - движение по X */
@@ -8,7 +9,7 @@ export class GreenMonster extends Entity {
     /** @type {number} - движение по Y */
     move_y = 0;
     /** @type {number} - скорость движения */
-    speed = 4;
+    speed = 8;
     /** @type {string} - имя текущей анимации */
     animationName = "orange_cat_go_left";
     /** @type {number} - номер текущего фрейма в анимации */
@@ -97,7 +98,7 @@ export class GreenMonster extends Entity {
      * @param {Entity} obj - сущность, с которой столкнулись
      */
     onTouchEntity(obj) {
-        if (obj.name.includes("Money"))
+        if (obj.name.includes(MoneyType))
             return;
         this.turnRight();
     }

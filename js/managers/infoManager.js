@@ -93,7 +93,6 @@ export var infoManager = {
         let x = mapManager.view.w - Padding;
 
         for (let i = 0; i < this.buttonNames.length; i++) {
-            console.log(this.buttonNames[i]);
             const sprite = spriteManager.getSprite(this.buttonNames[i]);
 
             let button = new Entity;

@@ -2,7 +2,7 @@ import { Entity } from "./Entity.js";
 import { spriteManager } from "../managers/spriteManager.js";
 import {physicManager} from "../managers/physicManager.js";
 import {mapManager} from "../managers/mapManager.js";
-import {gameManager, IceType} from "../core/gameManager.js";
+import {gameManager, GreenMonsterType, IceType, MoneyType} from "../core/gameManager.js";
 import {Ice} from "./Ice.js";
 
 export class Player extends Entity {
@@ -240,8 +240,7 @@ export class Player extends Entity {
      * Обрабатывает смерть игрока
      */
     kill() {
-        // TODO: реализовать логику смерти игрока
-        console.log("Player: You are dead");
+        gameManager.runLevel();
     }
 
     /**
@@ -249,10 +248,12 @@ export class Player extends Entity {
      * @param {Entity} obj - сущность, с которой столкнулись
      */
     onTouchEntity(obj) {
-        // TODO: реализовать логику столкновения с сущностями
-        if (obj.name.includes("Money") && !obj.isDead) {
+        if (obj.name.includes(MoneyType) && !obj.isDead) {
             this.points += obj.bonus;
             obj.kill();
+        }
+        else if (obj.name.includes(GreenMonsterType)) {
+            this.kill();
         }
     }
 

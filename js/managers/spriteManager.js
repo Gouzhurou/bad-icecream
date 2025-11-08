@@ -94,14 +94,14 @@ export var spriteManager = {
             ctx.drawImage(this.image, sprite.x, sprite.y, sprite.w, sprite.h, x, y, sprite.w, sprite.h);
 
             // TODO: убрать обводку
-            ctx.save();
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([]);
-            ctx.beginPath();
-            ctx.rect(x, y, sprite.w, sprite.h);
-            ctx.stroke();
-            ctx.restore();
+            // ctx.save();
+            // ctx.strokeStyle = 'red';
+            // ctx.lineWidth = 1;
+            // ctx.setLineDash([]);
+            // ctx.beginPath();
+            // ctx.rect(x, y, sprite.w, sprite.h);
+            // ctx.stroke();
+            // ctx.restore();
         }
     },
 
