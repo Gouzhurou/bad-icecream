@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Bad Icecream</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="main">
+    <div id="playerInfo" style="position: absolute; top: 10px; right: 10px; color: white; font-family: Arial; z-index: 1000;">
+        <span id="userNameDisplay"></span>
+        <button onclick="window.location.href='leaderboard.html'" style="margin-left: 10px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+            🏆 Рекорды
+        </button>
+        <button id="logoutBtn" style="margin-left: 10px; padding: 5px 10px;">Выйти</button>
+    </div>
+    <canvas id="gameCanvas" width="896" height="736"></canvas>
+</div>
+
+<script src="../js/index.js" type="module"></script>
+</body>
+</html>

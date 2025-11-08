@@ -9,6 +9,7 @@ import {
 import {mapManager} from "../managers/mapManager.js";
 import {spriteManager} from "../managers/spriteManager.js";
 import {infoManager} from "../managers/infoManager.js";
+import {userManager} from "./userManager.js";
 
 import {Player} from '../entities/Player.js';
 import {GreenMonster} from "../entities/GreenMonster.js";
@@ -256,6 +257,7 @@ export var gameManager = {
         }
 
         if (this.player.points === this.maxLevelBonus) {
+            userManager.updateLevelProgress(this.levelNumber, this.player.points);
             if (this.levelNumber === this.levelCount) {
                 this.menu();
                 return;
@@ -354,10 +356,11 @@ export var gameManager = {
         console.log('GameManager: Начало загрузки всех ресурсов игры');
 
         // TODO: изменить содержимое файлов, один файл - один уровень
-        mapManager.loadMap("./js/map.tmj");
+        // путь из index.html
+        mapManager.loadMap("/assets/maps/map.tmj");
         spriteManager.loadAtlas(
-            "./assets/images/atlas.json",
-            "./assets/images/atlas.png"
+            "/assets/images/atlas.json",
+            "/assets/images/atlas.png"
         );
 
         gameManager.levelDisplayFrames = gameManager.FPS * gameManager.levelDisplaySeconds;

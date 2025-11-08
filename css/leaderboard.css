@@ -1,0 +1,108 @@
+.leaderboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.leaderboard {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 600px;
+}
+
+.leaderboard h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-family: Arial, sans-serif;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.leaderboard-table th {
+    background: #667eea;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.leaderboard-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.leaderboard-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.leaderboard-table tr:hover {
+    background: #e9ecef;
+}
+
+.rank-1 { background: linear-gradient(45deg, #FFD700, #FFEC8B) !important; }
+.rank-2 { background: linear-gradient(45deg, #C0C0C0, #E8E8E8) !important; }
+.rank-3 { background: linear-gradient(45deg, #CD7F32, #E8B886) !important; }
+
+.player-rank {
+    font-weight: bold;
+    text-align: center;
+    width: 60px;
+}
+
+.player-score {
+    text-align: right;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.current-player {
+    background: #e3f2fd !important;
+    font-weight: bold;
+}
+
+.medal {
+    font-size: 18px;
+    margin-right: 5px;
+}

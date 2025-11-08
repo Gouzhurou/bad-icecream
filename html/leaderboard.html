@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Bad Icecream - Таблица рекордов</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/leaderboard.css">
+</head>
+<body>
+<div class="leaderboard-container">
+    <div class="leaderboard">
+        <h1>🏆 Таблица рекордов</h1>
+
+        <table class="leaderboard-table">
+            <thead>
+            <tr>
+                <th class="player-rank">Место</th>
+                <th>Игрок</th>
+                <th class="player-score">Очки</th>
+                <th>Уровни</th>
+            </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+            <!-- Данные будут загружены через JavaScript -->
+            </tbody>
+        </table>
+
+        <div class="buttons">
+            <button onclick="window.location.href='index.html'" class="btn btn-primary">🎮 Вернуться к игре</button>
+            <button onclick="window.location.href='login.html'" class="btn btn-secondary">🚪 Выйти</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/core/leaderBoard.js" type="module"></script>
+</body>
+</html>
