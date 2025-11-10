@@ -1,7 +1,7 @@
 import { Entity } from './Entity.js';
 import { spriteManager } from "../managers/spriteManager.js";
 import {physicManager} from "../managers/physicManager.js";
-import {MoneyType} from "../core/gameManager.js";
+import {MoneyType, PlayerType} from "../core/gameManager.js";
 
 export class GreenMonster extends Entity {
     /** @type {number} - движение по X */
@@ -98,6 +98,9 @@ export class GreenMonster extends Entity {
      * @param {Entity} obj - сущность, с которой столкнулись
      */
     onTouchEntity(obj) {
+        if (obj.name === PlayerType) {
+            obj.kill();
+        }
         if (obj.name.includes(MoneyType))
             return;
         this.turnRight();

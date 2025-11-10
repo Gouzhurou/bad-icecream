@@ -240,7 +240,7 @@ export class Player extends Entity {
      * Обрабатывает смерть игрока
      */
     kill() {
-        gameManager.runLevel();
+        gameManager.repeat();
     }
 
     /**

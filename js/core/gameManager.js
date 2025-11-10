@@ -45,7 +45,7 @@ export var gameManager = {
     levelNumber: 1,
 
     /** @type {number} - текущее количество уровней в игре */
-    levelCount: 0,
+    levelCount: 3,
 
     /** @type {number} - считает максимальный бонус, который можно получить на уровне */
     maxLevelBonus: 0,
@@ -197,6 +197,7 @@ export var gameManager = {
      */
     initPlayer(obj) {
         console.log('GameManager: Инициализация игрока', obj);
+
         this.player = obj;
     },
 
@@ -213,15 +214,15 @@ export var gameManager = {
      */
     startNextLevel() {
         this.levelNumber++;
-        this.isLevelStarting = true;
-        this.clearLevel();
-        mapManager.parseEntities();
+        this.runLevel();
     },
 
     /**
      * Полная очистка уровня со сбросом счетчиков
      */
     clearLevel() {
+        console.log(`GameManager: Очистка уровня`);
+
         this.player = null;
         this.hasFire = false;
 
@@ -238,12 +239,18 @@ export var gameManager = {
     },
 
     /**
-     * Запускает повтор уровня
+     * Запускает уровень
      */
     runLevel() {
+        console.log(`GameManager: Запуск ${this.levelNumber} уровня`);
+        this.clearLevel();
+        mapManager.clearMap();
+
+        // путь из index.html
+        const mapPath = `../assets/maps/level${this.levelNumber}.tmj`;
+        mapManager.loadMap(mapPath);
         this.isMenuActive = false;
         this.isLevelStarting = true;
-        this.clearLevel();
         mapManager.parseEntities();
     },
 
@@ -263,6 +270,7 @@ export var gameManager = {
                 return;
             }
             this.startNextLevel();
+            return;
         }
 
         this.player.move_x = 0;
@@ -356,8 +364,6 @@ export var gameManager = {
         console.log('GameManager: Начало загрузки всех ресурсов игры');
 
         // TODO: изменить содержимое файлов, один файл - один уровень
-        // путь из index.html
-        mapManager.loadMap("/assets/maps/map.tmj");
         spriteManager.loadAtlas(
             "/assets/images/atlas.json",
             "/assets/images/atlas.png"
@@ -370,15 +376,29 @@ export var gameManager = {
         gameManager.factory[MoneyType] = Money;
         gameManager.factory[IceType] = Ice;
 
-        mapManager.parseEntities();
         eventsManager.setup(canvas);
         infoManager.setup();
+    },
+
+    /**
+     * Повтор уровня
+     */
+    repeat() {
+        console.log(`GameManager: Повтор ${this.levelNumber} уровня`);
+
+        this.isLevelStarting = true;
+        this.clearLevel();
+        mapManager.parseEntities();
     },
 
     /**
      * Меню
      */
     menu() {
+        console.log("GameManager: Выход в меню");
+
+        this.clearLevel();
+        mapManager.clearMap();
         this.isMenuActive = true;
         this.stopUpdates();
         infoManager.drawMenu(this.ctx);
@@ -388,6 +408,8 @@ export var gameManager = {
      * Пауза
      */
     pause() {
+        console.log("GameManager: пауза");
+
         if (this.intervalId) {
             this.stopUpdates();
             infoManager.drawPause(this.ctx);

@@ -9,7 +9,7 @@ export class Money extends Entity {
     isDead = false;
 
     /** @type {string} - имя текущей анимации */
-    animationName = 'money64';
+    animationName = 'money';
     /** @type {number} - номер текущего фрейма в анимации */
     frameNumber = 0;
     /** @type {Object} - анимации сущности */
@@ -25,8 +25,13 @@ export class Money extends Entity {
             "bomb_8",
             "bomb_9",
         ],
-        "money64": [
-            "money64"
+        "money": [
+            "money_1",
+            "money_2",
+            "money_3",
+            "money_4",
+            "money_5",
+            "money_6",
         ]
     };
 

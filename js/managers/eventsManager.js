@@ -85,7 +85,7 @@ export var eventsManager = {
                         gameManager.pause();
                     }
                     else if (button.name === RepeatStr) {
-                        gameManager.runLevel();
+                        gameManager.repeat();
                     }
                     else if (button.name === MenuStr) {
                         gameManager.menu();

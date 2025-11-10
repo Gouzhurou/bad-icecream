@@ -1,7 +1,9 @@
 import {gameManager} from "../core/gameManager.js";
 
-const tileLayerType = "tilelayer";
-const objectLayerType = "objectgroup";
+const TileLayerType = "tilelayer";
+const ObjectLayerType = "objectgroup";
+const WallsLayerName = "walls";
+const CanvasId = "gameCanvas";
 
 /**
  * @typedef {Object} Tileset
@@ -51,8 +53,8 @@ export var mapManager = {
     jsonLoaded: false,
     view: {
         x: 0, y: 0,
-        w: document.getElementById("gameCanvas").width,
-        h: document.getElementById("gameCanvas").height},
+        w: document.getElementById(CanvasId).width,
+        h: document.getElementById(CanvasId).height},
 
     /**
      * Загружает JSON карты с сервера
@@ -95,10 +97,10 @@ export var mapManager = {
 
         for (var i = 0; i < this.mapData.layers.length; i++) {
             var layer = this.mapData.layers[i];
-            if (layer.type === tileLayerType) {
+            if (layer.type === TileLayerType) {
                 this.tLayer[this.tLayerCount++] = layer;
                 tileLayerCount++;
-                if (layer.name === "walls") {
+                if (layer.name === WallsLayerName) {
                     this.wallsLayer = layer;
                     this.wallsIndices = [...new Set(this.wallsLayer.data)].filter(i => i !== 0);
                 }
@@ -158,22 +160,9 @@ export var mapManager = {
             console.log('MapManager: Ресурсы еще не загружены, повторная попытка через 100мс');
             setTimeout(function () { mapManager.parseEntities(); }, 100);
         } else {
-            let levelLayerFound = false;
-            gameManager.levelCount = 0;
-
             for (var i = 0; i < this.mapData.layers.length; i++) {
                 var layer = this.mapData.layers[i];
-                if (layer.name.includes("level")) {
-                    gameManager.levelCount++;
-                }
-
-                if (
-                    layer.type === objectLayerType &&
-                    (layer.name === "ice" || layer.name === "level" + gameManager.levelNumber)
-                ) {
-                    if (layer.name === "level" + gameManager.levelNumber) {
-                        levelLayerFound = true;
-                    }
+                if (layer.type === ObjectLayerType) {
                     var entities = layer.objects;
                     for (var j = 0; j < entities.length; j++) {
                         var entity = entities[j];
@@ -192,14 +181,8 @@ export var mapManager = {
                     }
                 }
             }
-
-            if (!levelLayerFound) {
-                // TODO: реализовать выход на главный экран
-            }
         }
     },
-
-    //TODO: добавить отдельно отрисовку слоя background и остальных
 
     /**
      * Отрисовывает карту на canvas контексте
@@ -233,6 +216,46 @@ export var mapManager = {
     },
 
     /**
+     * Очищает данные загруженной карты и сбрасывает состояние менеджера
+     */
+    clearMap() {
+        console.log('MapManager: Очистка данных карты');
+
+        this.mapData = null;
+
+        this.tLayer.length = 0;
+        this.tLayerCount = 0;
+        this.wallsLayer = {};
+        this.wallsIndices.length = 0;
+
+        this.xCount = 0;
+        this.yCount = 0;
+        this.tSize.x = 64;
+        this.tSize.y = 64;
+        this.mapSize.x = 64;
+        this.mapSize.y = 64;
+
+        this.tilesets.forEach(tileset => {
+            if (tileset.image && tileset.image.src) {
+                tileset.image.src = '';
+                tileset.image.onload = null;
+                tileset.image.onerror = null;
+            }
+        });
+        this.tilesets.length = 0;
+
+        this.imgLoadCount = 0;
+        this.imgLoaded = false;
+        this.jsonLoaded = false;
+
+        const canvas = document.getElementById(CanvasId);
+        this.view.x = 0;
+        this.view.y = 0;
+        this.view.w = canvas ? canvas.width : 896;
+        this.view.h = canvas ? canvas.height : 736;
+    },
+
+    /**
      * Возвращает true, если объект находится в видимой зоне, иначе false
      * @param {number} x - X-координата объекта на карте (в пикселях)
      * @param {number} y - Y-координата объекта на карте (в пикселях)
@@ -247,7 +270,6 @@ export var mapManager = {
             x > this.view.x + this.view.w || // объект правее видимой области
             y > this.view.y + this.view.h // объект ниже видимой области
         );
-
     },
 
     /**
