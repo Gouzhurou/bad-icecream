@@ -15,11 +15,13 @@ import {Player} from '../entities/Player.js';
 import {GreenMonster} from "../entities/GreenMonster.js";
 import {Money} from "../entities/Money.js";
 import {Ice} from "../entities/Ice.js";
+import {Cow} from "../entities/Cow.js";
 
 export const IceType = "Ice";
 export const PlayerType = "Player";
 export const GreenMonsterType = "GreenMonster";
 export const MoneyType = "Money";
+export const CowType = "Cow";
 
 export var gameManager = {
     /** @type {Object<string, Entity>} - эталонные объекты, которые используются для
@@ -375,6 +377,7 @@ export var gameManager = {
         gameManager.factory[GreenMonsterType] = GreenMonster;
         gameManager.factory[MoneyType] = Money;
         gameManager.factory[IceType] = Ice;
+        gameManager.factory[CowType] = Cow;
 
         eventsManager.setup(canvas);
         infoManager.setup();

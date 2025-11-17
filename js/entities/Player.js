@@ -2,7 +2,7 @@ import { Entity } from "./Entity.js";
 import { spriteManager } from "../managers/spriteManager.js";
 import {physicManager} from "../managers/physicManager.js";
 import {mapManager} from "../managers/mapManager.js";
-import {gameManager, GreenMonsterType, IceType, MoneyType} from "../core/gameManager.js";
+import {CowType, gameManager, GreenMonsterType, IceType, MoneyType} from "../core/gameManager.js";
 import {Ice} from "./Ice.js";
 
 export class Player extends Entity {
@@ -146,7 +146,7 @@ export class Player extends Entity {
         ],
     };
     /** @type {boolean} - Показывает на наличие текущего процесса огня */
-    isFireStarted = false;
+    isFire = false;
     /** @type {boolean} - Показывает на наличие анимации подачи игроком огня */
     isFireAnimationStarted = false;
     /** @type {number} - X-координата текущего льда */
@@ -222,14 +222,14 @@ export class Player extends Entity {
             }
         }
 
-        if (this.isFireStarted) {
+        if (this.isFire) {
             if (this.isAddIce) {
                 this.addIce();
             } else {
                 this.deleteIce();
             }
 
-            if (this.isFireStarted) {
+            if (this.isFire) {
                 this.fire_x += this.fire_direction_x * mapManager.tSize.x;
                 this.fire_y += this.fire_direction_y * mapManager.tSize.y;
             }
@@ -252,37 +252,21 @@ export class Player extends Entity {
             this.points += obj.bonus;
             obj.kill();
         }
-        else if (obj.name.includes(GreenMonsterType)) {
+        else if (obj.name.includes(GreenMonsterType) || obj.name.includes(CowType)) {
             this.kill();
         }
-    }
-
-    /**
-     * Ищет координаты соседнего по направлению блока
-     * @return {Object} - координаты соседнего по направлению блока (в пикселях)
-     */
-    getNearlyBlock() {
-        var x = Math.floor((this.pos_x + this.direction_x * this.size_x) / mapManager.tSize.x);
-        var y = Math.floor((this.pos_y + this.direction_y * this.size_y) / mapManager.tSize.y);
-        if (this.pos_x % mapManager.tSize.x !== 0 && this.direction_x === 1) {
-            x += 1;
-        }
-        if (this.pos_y % mapManager.tSize.y !== 0 && this.direction_y === 1) {
-            y += 1;
-        }
-
-        return {
-            x: x * mapManager.tSize.x,
-            y: y * mapManager.tSize.y
-        };
     }
 
     /**
      * Добавляет или убирает, если уже есть, блоки льда по направлению движения
      */
     fire() {
-        if (!this.isFireStarted) {
-            let coordinates = this.getNearlyBlock();
+        if (!this.isFire) {
+            let coordinates = mapManager.getNearlyBlock(
+                {x: this.pos_x, y: this.pos_y},
+                {x: this.size_x, y: this.size_y},
+                {x: this.direction_x, y: this.direction_y}
+            );
             this.fire_x = coordinates.x;
             this.fire_y = coordinates.y;
 
@@ -303,7 +287,7 @@ export class Player extends Entity {
             this.frameNumber = 0;
             this.isFireAnimationStarted = true;
 
-            this.isFireStarted = true;
+            this.isFire = true;
         }
     }
 
@@ -311,7 +295,7 @@ export class Player extends Entity {
      * Устанавливает значения по умолчанию для полей, используемых для реализации выстрела
      */
     setDefaultFireState() {
-        this.isFireStarted = false;
+        this.isFire = false;
         this.fire_x = 0;
         this.fire_y = 0;
         this.fire_w = 0;

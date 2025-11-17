@@ -117,10 +117,10 @@ export class GreenMonster extends Entity {
      * Поворот направо на 90 градусов
      */
     turnRight() {
-        const newX = (-1) * this.move_y;
-        const newY = this.move_x;
+        const newMoveX = (-1) * this.move_y;
+        const newMoveY = this.move_x;
 
-        this.move_x = newX;
-        this.move_y = newY;
+        this.move_x = newMoveX;
+        this.move_y = newMoveY;
     }
 }

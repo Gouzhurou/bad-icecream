@@ -342,6 +342,35 @@ export var mapManager = {
     },
 
     /**
+     * Ищет координаты соседнего по направлению блока
+     * @param {Object} position - Текущая позиция объекта на карте
+     * @param {number} position.x - X-координата левого верхнего угла объекта (в пикселях)
+     * @param {number} position.y - Y-координата левого верхнего угла объекта (в пикселях)
+     * @param {Object} size - Габаритные размеры объекта
+     * @param {number} size.x - Ширина объекта (в пикселях)
+     * @param {number} size.y - Высота объекта (в пикселях)
+     * @param {Object} direction - Вектор направления движения
+     * @param {number} direction.x - Направление по оси X: -1 (влево), 0 (нет движения), 1 (вправо)
+     * @param {number} direction.y - Направление по оси Y: -1 (вверх), 0 (нет движения), 1 (вниз)
+     * @return {Object} - координаты соседнего по направлению блока (в пикселях)
+     */
+    getNearlyBlock(position, size, direction) {
+        let x = Math.floor((position.x + direction.x * size.x) / this.tSize.x);
+        let y = Math.floor((position.y + direction.y * size.y) / this.tSize.y);
+        if (position.x % this.tSize.x !== 0 && direction.x === 1) {
+            x += 1;
+        }
+        if (position.y % this.tSize.y !== 0 && direction.y === 1) {
+            y += 1;
+        }
+
+        return {
+            x: x * this.tSize.x,
+            y: y * this.tSize.y
+        };
+    },
+
+    /**
      * Центрирует видимую область относительно передвижений игрока
      * @param x - X-координата игрока на карте в пикселях
      * @param y - Y-координата игрока на карте в пикселях
